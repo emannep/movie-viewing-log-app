@@ -16,11 +16,12 @@
 ・映画の登録 / 編集 / 削除（CRUD）
 ・「視聴済」「視聴希望」ステータス管理、評価（★1〜5）、感想の記録
 ・検索・フィルタ（ジャンル、評価、状態）
+・レコメンド機能によるおすすめ表示
 ・RLSによるユーザーごとのデータ保護
 
 ##　使用技術
 
-Frontend: Next.js（App Router）/ TypeScript / Tailwind CSS
+Frontend: Next.js（App Router）/ TypeScript / Tailwind CSS / shadcn/ui
 Backend: Supabase（PostgreSQL / Auth / RLS）
 Hosting: Vercel
 
