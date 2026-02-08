@@ -1,0 +1,34 @@
+{
+  "name": "movie-viewing-log-app",
+  "version": "1.0.0",
+  "description": "「」個人向けの映画評価アプリ",
+  "homepage": "https://github.com/emannep/movie-viewing-log-app#readme",
+  "bugs": {
+    "url": "https://github.com/emannep/movie-viewing-log-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emannep/movie-viewing-log-app.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.8.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.0.0"
+  }
+}
