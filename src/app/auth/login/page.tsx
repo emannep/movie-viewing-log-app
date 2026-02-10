@@ -39,10 +39,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-2xl bg-slate-900/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
         <div className="px-8 pt-8 pb-4">
           <h1 className="text-2xl font-semibold text-white tracking-tight">
-            映画ログにログイン
+            ログイン
           </h1>
           <p className="mt-2 text-sm text-slate-300">
-            視聴した映画の記録やレコメンドを見るには、メールアドレスでログインしてください。
+            メールアドレスとパスワードを入力して入場
           </p>
         </div>
 
