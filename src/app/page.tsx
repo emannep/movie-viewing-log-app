@@ -1,18 +1,22 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 
-/**
- * アプリ起動時に最初に表示される認証用の画面。
- * ここからログイン画面（/auth/login）へ遷移する。
- */
+
 export default function RootPage() {
+  const handleClick = () => {
+    window.open("/auth/login", "popup"
+  )}
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
-      <div className="w-full max-w-lg rounded-2xl bg-slate-900/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
+    <div className="">
+      <div className="w-full max-w-lg rounded-2xl bg-zinc-950/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
         <div className="px-8 pt-8 pb-6">
-          <p className="text-xs font-semibold tracking-widest text-indigo-400 uppercase">
+          <p className="text-xs font-semibold tracking-widest text-orange-300 uppercase">
             Movie Viewing Log
           </p>
-          <h1 className="mt-2 text-2xl font-semibold text-white tracking-tight">
+          <h1 className="flex justify-center items-center text-center mt-2 text-2xl font-semibold text-orange-300 tracking-tight">
             「みたろぐ」へようこそ
           </h1>
           <p className="mt-3 text-sm text-slate-300 leading-relaxed">
@@ -21,18 +25,20 @@ export default function RootPage() {
           </p>
         </div>
 
+        
         <div className="px-8 pb-8 flex flex-col gap-4">
-          {/* 仮のボタン：ログイン画面へ遷移 */}
-          <Link
-            href="/auth/login"
-            className="inline-flex w-full items-center justify-center rounded-md bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+          <Button size="lg"
+            className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
+            onClick={handleClick}
           >
             ログイン画面へ進む
+          </Button>
+          <Link 
+            className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
+            href="/app"
+          >
+            仮設メインページへ
           </Link>
-
-          <p className="text-xs text-slate-400">
-            ※ 現在は認証導線の確認用として、ログイン画面へ移動する仮のボタンのみを配置しています。
-          </p>
         </div>
       </div>
     </div>
