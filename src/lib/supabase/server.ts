@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * Cookie 経由でセッションを共有する。
  */
 export async function createClient() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
