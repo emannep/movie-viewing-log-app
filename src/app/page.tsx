@@ -14,7 +14,7 @@ export default function RootPage() {
       <div className="w-full max-w-lg rounded-2xl bg-zinc-950/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
         <div className="px-8 pt-8 pb-6">
           <p className="text-xs font-semibold tracking-widest text-orange-300 uppercase">
-            Movie Viewing Log
+            Movies Viewing Log
           </p>
           <h1 className="flex justify-center items-center text-center mt-2 text-2xl font-semibold text-orange-300 tracking-tight">
             「みたろぐ」へようこそ
@@ -35,7 +35,7 @@ export default function RootPage() {
           </Button>
           <Link 
             className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
-            href="/app"
+            href="/main"
           >
             仮設メインページへ
           </Link>

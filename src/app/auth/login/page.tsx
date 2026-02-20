@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from "@/lib/supabase/client";
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="px-8 pb-8 space-y-6">
+        <form className="px-8 pb-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-200">
               メールアドレス
@@ -108,7 +108,6 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              onClick={handleSubmit}
               className="inline-flex w-full items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? 'ログイン中...' : 'ログイン'}
@@ -117,7 +116,7 @@ export default function LoginPage() {
               または
             </p>
             <button
-              type="submit"
+              type="button"
               disabled={isSubmitting}
               onClick={signUp}
               className="inline-flex w-full items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-70"
