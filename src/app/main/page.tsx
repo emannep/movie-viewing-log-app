@@ -11,26 +11,30 @@ function MainPage() {
           <h1 className="flex justify-center"
           >
             みたろぐ</h1>
-          <link rel="canonical" href="/app/main" />
+          <link rel="canonical" href="/main" />
         </header>
 
         <main>
           <Link className="flex justify-center bg-red-900 rounded-2xl"
-            href="/app/main/recommend_movies">
+            href="/main/recommend_movies">
               レコメンド、おすすめ
           </Link>
           <div className="grid grid-cols-2">
             <Link className="bg-red-900 rounded-2xl"
-              href="/app/main/registration">
+              href="/main/registration">
                 映画登録
             </Link>
             <Link className="bg-red-900 rounded-2xl"
-              href="/app/main/movies">
+              href="/main/movies">
                 映画一覧・編集
             </Link>
             <Link className="bg-red-900 rounded-2xl"
-              href="/app/main/settings">
+              href="/main/settings">
                 プロフィール・設定
+            </Link>
+            <Link className="bg-red-900 rounded-2xl"
+              href="/main/movies/test">
+                kari
             </Link>
           </div>
         </main>
