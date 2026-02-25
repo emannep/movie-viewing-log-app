@@ -1,45 +1,69 @@
 
 import { createClient } from "@/lib/supabase/server"; 
-//import { registerMovie } from "@/actions/movies";
 import { redirect } from "next/navigation";
 
 export default async function MoviesPage() {
   const supabase = await createClient();
 
-  /*let user = null;
-  try {
-    const result = await supabase.auth.getUser();
-    user = result.data.user;
-  } catch (e) {
-    console.error("auth.getUser エラー:", e);
-    return (
-      <div className="p-4 text-red-600">
-        ユーザー情報の取得に失敗しました。
-      </div>
-    );
+  const { data: userRes, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !userRes.user) redirect("/login");
+
+  const { data, error } = await supabase
+    .from("user_movies")
+    .select(`
+      id,
+      status,
+      memo,
+      watched_at,
+      created_at,
+      movies (
+        id,
+        title,
+        year,
+        genres,
+        tmdb_id,
+        imdb_id
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("movies 取得エラー:", error);
   }
 
-  if (!user) {
-    // ここまで来て user がいない場合は素直にリダイレクト
-    redirect("/login");
-  }*/
-
-  const movies: any[] | null = null;//24〜37要確認
-  try {
-    const { data, error } = await supabase
-      .from("movies")
-      .select("*")
-      .order("watched_at", { ascending: false });
-
-    if (error) {
-      console.error("movies 取得エラー:", error);
-    }
-    movies = data;
-  } catch (e) {
-    console.error("movies クエリ実行エラー:", e);
-  }
+  const rows = data ?? [];
 
   return (
+    <div className="mx-auto max-w-3xl p-6">
+      <h1 className="mb-4 text-xl font-bold">登録映画一覧</h1>
+
+      {rows.length ? (
+        <div className="space-y-3">
+          {rows.map((row: any) => (
+            <div key={row.id} className="rounded border p-3">
+              <div className="font-semibold">
+                {row.movies?.title} {row.movies?.year ? `(${row.movies.year}年)` : ""}
+              </div>
+
+              <div className="text-sm text-gray-700">状態: {row.status}</div>
+
+              {row.watched_at && (
+                <div className="text-sm text-gray-700">
+                  視聴日: {new Date(row.watched_at).toLocaleDateString()}
+                </div>
+              )}
+
+              {row.memo && <div className="mt-2 text-sm">{row.memo}</div>}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>まだ登録された映画がありません！</div>
+      )}
+    </div>
+  );
+
+  /*return (
     <div className="space-y-2">
       <h2 className="text-xl font-semibold">登録映画一覧</h2>
 
@@ -86,5 +110,5 @@ export default async function MoviesPage() {
         </p>
       )}
     </div>
-  );
+  );*/
 }
