@@ -12,20 +12,55 @@ export async function registerMovie(formData: FormData) {
   const userId = userRes.user.id;
 
   const title = String(formData.get("title") ?? "").trim();
-  const yearStr = String(formData.get("year") ?? "").trim();
-  const status = String(formData.get("status") ?? "want_to_watch"); // watched / want_to_watch
+  const yearRaw = formData.get("year");
+  const status = String(formData.get("status") ?? " watched / want_to_watch"); // watched / want_to_watch
   const memo = String(formData.get("memo") ?? "").trim();
   const watchedAtStr = String(formData.get("watched_at") ?? "").trim();
 
-  if (!title) throw new Error("title is required");
+  if (!title) {
+    throw new Error("タイトルは必須です");
+  }
+  
+  if (!yearRaw) {
+    throw new Error("年は必須です");
+  }
+  const year = Number(yearRaw);
+  const currentYear = new Date().getFullYear();
+  const maxYear = currentYear + 10;
+  if (isNaN(year)) {
+    throw new Error("年は数値で入力してください");
+  }
+  if (year < 1888 || year > maxYear) {
+    throw new Error(`年は 1888〜${maxYear} の間で入力してください`);
+  }
 
-  const year = yearStr ? Number(yearStr) : null;
   const watched_at =
     status === "watched" && watchedAtStr ? new Date(watchedAtStr).toISOString() : null;
 
-  // 1) moviesに映画を用意（最小：title + year で探す）
-  // ※将来 tmdb_id を使うなら、そっちをキーにするのが一番安全
-  const { data: existing, error: findErr } = await supabase
+  try {
+  
+    // 1) moviesに映画を用意（最小：title + year で探す）
+    // ※将来 tmdb_id を使うなら、そっちをキーにするのが一番安全 
+    const { data, error } = await supabase.rpc("register_movie_data", {
+      _title: title,
+      _year: year,
+      _status: status,
+      _memo: memo,
+      _watched_at: watched_at,
+    });
+
+    if (error) {
+      console.error("movies 取得エラー:", error);
+    throw new Error(error.message);
+    }
+    return data;
+  } catch (e) {
+    console.error("movies クエリ実行エラー:", e);
+    throw e;
+  }
+}
+
+  /*const { data: existing, error: findErr } = await supabase
     .from("movies")
     .select("id")
     .eq("title", title)
@@ -62,6 +97,4 @@ export async function registerMovie(formData: FormData) {
     );
 
   if (upsertErr) throw new Error(upsertErr.message);
-
-  redirect("/movies");
-}
+  redirect("/movies");*/

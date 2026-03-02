@@ -1,34 +1,12 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-
-async function registerMovie(formData: FormData) {
-  const supabase = await createClient();
-
-  try {
-    const { data: userRes, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userRes.user) redirect("/login");
-    const userId = userRes.user.id;
-
-    const { data, error } = await supabase.rpc("register_movie_data", {
-      _title: title,
-      _year: year,
-      _genres: genres,
-      _status: status,
-      _rating: rating,
-      _memo: memo,
-      _watched_at: watched_at,
-      _created_at: created_at,
-    })
-    if (error) {
-      console.error("movies 取得エラー:", error);
-    } catch (e) {
-      console.error("movies クエリ実行エラー:", e);
-    }
-  }
-
+import { registerMovie } from '@/actions/registration';
 
 export default async function RegisterPage() {
+  const currentYear = new Date().getFullYear();
+  const maxYear = currentYear + 10;
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 p-4">
       <h1 className="text-2xl font-bold">映画を登録</h1>
@@ -45,9 +23,12 @@ export default async function RegisterPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">映画製作年度</label>
+          <label className="block text-sm font-medium">映画公開年度</label>
           <input
             name="year"
+            type="number"
+            min="1888"
+            max={maxYear}
             className="mt-1 w-full rounded border px-2 py-1"
             required
           />
