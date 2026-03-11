@@ -1,14 +1,10 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
 
 
 export default function RootPage() {
-  const handleClick = () => {
-    window.open("/auth/login", "popup"
-  )}
-
   return (
     <div className="">
       <div className="w-full max-w-lg rounded-2xl bg-zinc-950/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
@@ -27,17 +23,21 @@ export default function RootPage() {
 
         
         <div className="px-8 pb-8 flex flex-col gap-4">
-          <Button size="lg"
-            className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
-            onClick={handleClick}
+          <Link
+            className="flex justify-center"
+            href="/auth/login"
           >
-            ログイン画面へ進む
-          </Button>
+            <Button size="lg"
+              className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
+            >
+              ログイン画面へ進む
+            </Button>
+          </Link>
           <Link 
             className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
             href="/main"
           >
-            仮設メインページへ
+            仮設ボタンメインページへ
           </Link>
         </div>
       </div>

@@ -3,17 +3,21 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export async function registerMovie(formData: FormData) {
   const supabase = await createClient();
 
   const { data: userRes, error: userErr } = await supabase.auth.getUser();
-  if (userErr || !userRes.user) redirect("/login");
+  if (userErr || !userRes.user) redirect("/auth/login");
   const userId = userRes.user.id;
 
   const title = String(formData.get("title") ?? "").trim();
   const yearRaw = formData.get("year");
-  const status = String(formData.get("status") ?? " watched / want_to_watch"); // watched / want_to_watch
+  const genresRaw = String(formData.get("genres") ?? "").trim();
+  const status = String(formData.get("status") ?? "watched"); // watched / wishlist
+  const ratingRaw = formData.get("rating");
+  const createdAtStr = String(formData.get("created_at") ?? "").trim();
   const memo = String(formData.get("memo") ?? "").trim();
   const watchedAtStr = String(formData.get("watched_at") ?? "").trim();
 
@@ -34,25 +38,52 @@ export async function registerMovie(formData: FormData) {
     throw new Error(`年は 1888〜${maxYear} の間で入力してください`);
   }
 
+  const genresArray =
+    genresRaw === ""
+      ? []  // 空なら空配列
+      : genresRaw
+          .split(/[、,]/)
+          .map((g) => g.trim())
+          .filter((g) => g.length > 0);
+
+  let rating: number | null = null;
+  if (ratingRaw !== null) {
+    const parsedRating = Number(ratingRaw);
+    if (!Number.isNaN(parsedRating)) {
+      if (parsedRating < 1 || parsedRating > 5) {
+        throw new Error("評価は 1〜5 の間で入力してください");
+      }
+      rating = parsedRating;
+    }
+  }
+
   const watched_at =
     status === "watched" && watchedAtStr ? new Date(watchedAtStr).toISOString() : null;
 
+  const created_at = createdAtStr ? new Date(createdAtStr).toISOString() : null;
+
   try {
   
-    // 1) moviesに映画を用意（最小：title + year で探す）
-    // ※将来 tmdb_id を使うなら、そっちをキーにするのが一番安全 
+    // ※将来 tmdb_id を使う、そっちをキーにする 
     const { data, error } = await supabase.rpc("register_movie_data", {
       _title: title,
       _year: year,
+      _genres: genresArray,
       _status: status,
+      _rating: rating,
       _memo: memo,
       _watched_at: watched_at,
+      _created_at: created_at,
     });
 
     if (error) {
       console.error("movies 取得エラー:", error);
-    throw new Error(error.message);
+      throw new Error(error.message);
     }
+
+    revalidatePath("/main/movies");
+    redirect("/main/movies");
+
     return data;
   } catch (e) {
     console.error("movies クエリ実行エラー:", e);

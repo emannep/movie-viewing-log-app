@@ -1,7 +1,7 @@
-'use server';
+//'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { registerMovie } from '@/actions/registration';
+import { registerMovie } from '@/app/actions/registration';
 
 export default async function RegisterPage() {
   const currentYear = new Date().getFullYear();
@@ -34,6 +34,7 @@ export default async function RegisterPage() {
           />
         </div>
 
+
         <div>
           <label className="block text-sm font-medium">ジャンル</label>
           <input
@@ -56,13 +57,17 @@ export default async function RegisterPage() {
 
         <div>
           <label className="block text-sm font-medium">評価（1〜5）</label>
-          <input
-            type="number"
+          <select
             name="rating"
-            min={1}
-            max={5}
             className="mt-1 w-full rounded border px-2 py-1"
-          />
+          >
+            <option value="0"> </option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
         </div>
 
         <div>
@@ -104,3 +109,11 @@ export default async function RegisterPage() {
     </div>
   )
 }
+
+/*<input
+            type="number"
+            name="rating"
+            min={1}
+            max={5}
+            className="mt-1 w-full rounded border px-2 py-1"
+          />*/

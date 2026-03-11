@@ -4,10 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-/**
- * ミドルウェア用の Supabase クライアントでセッションを更新し、
- * 更新後のレスポンスを返す。Cookie の書き換えをレスポンスに反映するために使う。
- */
+/*セッションを更新、更新後のレスポンスを返す*/
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
@@ -31,8 +28,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ここで必要なら「未ログイン時は /auth/login にリダイレクト」などの制御ができる
-  // 例: if (!user && request.nextUrl.pathname.startsWith('/app')) { return NextResponse.redirect(...) }
+  const { pathname } = request.nextUrl;
+
+  const isLoginPage = pathname.startsWith("/login");
+  const isMainPage = pathname.startsWith("/main");
+
+  if (!user && isMainPage) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (user && isLoginPage) {
+    return NextResponse.redirect(new URL("/main/movies", request.url));
+  }
 
   return response;
 }
+
+export const config = {
+  matcher: ["/main/:path*", "/auth/login"],
+};

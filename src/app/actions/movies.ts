@@ -1,17 +1,15 @@
 //映画登録用の Server Action（"use server"）
-//`revalidatePath` のパスは、実際のルーティング（`/app/movies` なのか `/movies` なのか）に合わせてください。
 
 "use server";
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function movieAction(formData: FormData) {
+export async function movieAction() {
   const supabase = await createClient();
 
   const { data: userRes, error: userErr } = await supabase.auth.getUser();
-  if (userErr || !userRes.user) redirect("/login");
-  const userId = userRes.user.id;
+  if (userErr || !userRes.user) redirect("/auth/login");
 
   const { data, error } = await supabase
     .from("user_movies")
@@ -29,6 +27,9 @@ export async function movieAction(formData: FormData) {
         tmdb_id,
         imdb_id
       )
+      user_reviews (
+        rating,
+        review
     `)
     .order("created_at", { ascending: false });
   if (error) {
@@ -36,10 +37,11 @@ export async function movieAction(formData: FormData) {
   }
   
   const rows = data ?? [];
-
+  return rows;
 
 }
 
+/*
 export async function updateMovie(movieId: string, formData: FormData) {
   const supabase = createSupabaseServerClient();
 
@@ -60,6 +62,7 @@ export async function updateMovie(movieId: string, formData: FormData) {
 
   if (error) throw new Error(error.message);
 }
+*/
 
 /*
 const MovieSchema = z.object({
