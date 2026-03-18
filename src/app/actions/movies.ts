@@ -1,4 +1,3 @@
-//映画登録用の Server Action（"use server"）
 
 "use server";
 
@@ -26,15 +25,22 @@ export async function movieAction() {
         genres,
         tmdb_id,
         imdb_id
-      )
+      ),
       user_reviews (
-        rating,
-        review
+        rating
+      )
     `)
     .order("created_at", { ascending: false });
   if (error) {
-    console.error("movies 取得エラー:", error);
+    console.error("movies 取得エラー:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
   }
+    //console.error("movies 取得エラー:", error);
+  //}
   
   const rows = data ?? [];
   return rows;

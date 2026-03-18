@@ -47,15 +47,18 @@ export async function registerMovie(formData: FormData) {
           .filter((g) => g.length > 0);
 
   let rating: number | null = null;
-  if (ratingRaw !== null) {
-    const parsedRating = Number(ratingRaw);
-    if (!Number.isNaN(parsedRating)) {
-      if (parsedRating < 1 || parsedRating > 5) {
-        throw new Error("評価は 1〜5 の間で入力してください");
-      }
+  if (status !== "wishlist" ) {
+    if (ratingRaw !== null) {
+      const parsedRating = Number(ratingRaw);
+      if (!Number.isNaN(parsedRating)) {
+        if (parsedRating < 1 || parsedRating > 5) {
+          throw new Error("評価は 1〜5 の間で入力してください");
+        }
       rating = parsedRating;
+      }
     }
   }
+  
 
   const watched_at =
     status === "watched" && watchedAtStr ? new Date(watchedAtStr).toISOString() : null;
