@@ -1,29 +1,113 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
-const ReviewSchema = z.object({
-  movie_id: z.string().uuid(),
-  rating: z.number().int().min(1).max(5),
-  body: z.string().optional().nullable(),
-});
+const GENRE_ID_MAP: Record<string, number> = {
+  "アクション": 28,
+  "アドベンチャー": 12,
+  "アニメーション": 16,
+  "コメディ": 35,
+  "犯罪": 80,
+  "ドキュメンタリー": 99,
+  "ドラマ": 18,
+  "ファミリー": 10751,
+  "ファンタジー": 14,
+  "歴史": 36,
+  "ホラー": 27,
+  "音楽": 10402,
+  "ミステリー": 9648,
+  "ロマンス": 10749,
+  "SF": 878,
+  "スリラー": 53,
+  "戦争": 10752,
+  "西部劇": 37,
+};
 
-export async function upsertReview(input: unknown) {
-  const supabase = createSupabaseServerClient();
+export type RecommendedMovie = {
+  tmdb_id: number;
+  title: string;
+  year: string;
+  poster_path: string | null;
+  tmdb_vote_average: number;
+};
+
+export async function getRecommendations(limit = 12): Promise<RecommendedMovie[]> {
+  const supabase = await createClient();
+
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw new Error("Not authenticated");
+  if (!auth.user) return [];
 
-  const parsed = ReviewSchema.safeParse(input);
-  if (!parsed.success) throw new Error(parsed.error.message);
+  const { data: userMovies } = await supabase
+    .from("user_movies")
+    .select(`
+      status,
+      movies (genres, tmdb_id),
+      user_reviews (rating)
+    `);
 
-  const { error } = await supabase.from("reviews").upsert(
-    {
-      user_id: auth.user.id,
-      ...parsed.data,
-      body: parsed.data.body ?? null,
-    },
-    { onConflict: "user_id,movie_id" }
-  );
+  if (!userMovies || userMovies.length === 0) return [];
 
-  if (error) throw new Error(error.message);
+  const genreCount: Record<string, number> = {};
+  const registeredTmdbIds = new Set<number>();
+
+  for (const row of userMovies) {
+    const movie = Array.isArray(row.movies) ? row.movies[0] : (row.movies as any);
+    const review = Array.isArray(row.user_reviews) ? row.user_reviews[0] : (row.user_reviews as any);
+
+    if (movie?.tmdb_id) registeredTmdbIds.add(movie.tmdb_id);
+
+    if (row.status === "watched" && (review?.rating ?? 0) >= 4 && movie?.genres) {
+      for (const g of movie.genres) {
+        genreCount[g] = (genreCount[g] ?? 0) + 1;
+      }
+    }
+  }
+
+  // 高評価映画がなければ視聴済み全ジャンルにフォールバック
+  if (Object.keys(genreCount).length === 0) {
+    for (const row of userMovies) {
+      if (row.status !== "watched") continue;
+      const movie = Array.isArray(row.movies) ? row.movies[0] : (row.movies as any);
+      if (movie?.genres) {
+        for (const g of movie.genres) {
+          genreCount[g] = (genreCount[g] ?? 0) + 1;
+        }
+      }
+    }
+  }
+
+  const topGenres = Object.entries(genreCount)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+    .map(([name]) => name);
+
+  const tmdbGenreIds = topGenres.map((g) => GENRE_ID_MAP[g]).filter(Boolean);
+  if (tmdbGenreIds.length === 0) return [];
+
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) return [];
+
+  const url = new URL("https://api.themoviedb.org/3/discover/movie");
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("with_genres", tmdbGenreIds.join(","));
+  url.searchParams.set("sort_by", "vote_average.desc");
+  url.searchParams.set("vote_count.gte", "500");
+  url.searchParams.set("language", "ja-JP");
+  url.searchParams.set("page", "1");
+
+  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  if (!res.ok) return [];
+
+  const data = await res.json();
+
+  return (data.results ?? [])
+    .filter((m: any) => !registeredTmdbIds.has(m.id))
+    .slice(0, limit)
+    .map((m: any) => ({
+      tmdb_id: m.id,
+      title: m.title,
+      year: m.release_date?.substring(0, 4) ?? "",
+      poster_path: m.poster_path ?? null,
+      tmdb_vote_average: m.vote_average,
+    }));
 }
