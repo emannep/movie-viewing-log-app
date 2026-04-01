@@ -89,7 +89,7 @@ export async function getRecommendations(limit = 12): Promise<RecommendedMovie[]
 
   const url = new URL("https://api.themoviedb.org/3/discover/movie");
   url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("with_genres", tmdbGenreIds.join(","));
+  url.searchParams.set("with_genres", tmdbGenreIds.join("|"));
   url.searchParams.set("sort_by", "vote_average.desc");
   url.searchParams.set("vote_count.gte", "500");
   url.searchParams.set("language", "ja-JP");

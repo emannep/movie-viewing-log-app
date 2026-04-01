@@ -185,9 +185,9 @@ export async function updateMovie(formData: FormData) {
     }
 
     revalidatePath("/main/movies");
-    redirect("/main/movies");
   } catch (e) {
     console.error("movies 更新エラー:", e);
     throw e;
   }
+  redirect("/main/movies");
 }
