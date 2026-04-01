@@ -95,13 +95,11 @@ export async function registerMovie(formData: FormData) {
     }
 
     revalidatePath("/main/movies");
-    redirect("/main/movies");
-
-    return data;
   } catch (e) {
     console.error("movies クエリ実行エラー:", e);
     throw e;
   }
+  redirect("/main/movies");
 }
 
 export async function updateMovie(formData: FormData) {
