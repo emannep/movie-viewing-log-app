@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SlActionUndo } from "react-icons/sl";
 
 type UserMovieRow = {
   id: string;
@@ -8,18 +11,19 @@ type UserMovieRow = {
   memo?: string | null;
   watched_at?: string | null;
   created_at?: string | null;
-  movies?: Array<{
-    id?: string | null;
-    title?: string | null;
-    year?: number | string | null;
-    genres?: string | null;
-    tmdb_id?: number | string | null;
-    imdb_id?: string | null;
-  }> | null;
-  user_reviews?: Array<{
-    rating?: number | string | null;
-    review?: string | null;
-  }> | null;
+  movies?: {
+    id: string;
+    title: string;
+    year: number;
+    genres: string[] | null;
+    tmdb_id: number | null;
+    imdb_id: string | null;
+    poster_path: string | null;
+    tmdb_vote_average: number | null;
+  } | null;
+  user_reviews?: {
+    rating: number;
+  } | null;
 };
 
 type SortKey =
@@ -28,6 +32,7 @@ type SortKey =
   | "genres"
   | "status"
   | "rating"
+  | "tmdb_vote_average"
   | "memo"
   | "watched_at"
   | "created_at";
@@ -79,18 +84,20 @@ function compareNullable(a: unknown, b: unknown, kind: "text" | "number" | "time
 }
 
 function getValue(row: UserMovieRow, key: SortKey): unknown {
-  const movie = row.movies?.[0];
+  const movie = row.movies;
   switch (key) {
     case "title":
       return movie?.title ?? "";
     case "year":
       return movie?.year ?? null;
     case "genres":
-      return movie?.genres ?? "";
+      return movie?.genres ? movie.genres.join(", ") : "";
     case "status":
       return row.status ?? "";
     case "rating":
-      return row.user_reviews?.[0]?.rating ?? null;
+      return row.user_reviews?.rating ?? null;
+    case "tmdb_vote_average":
+      return movie?.tmdb_vote_average ?? null;
     case "memo":
       return row.memo ?? "";
     case "watched_at":
@@ -134,7 +141,7 @@ function Th({
       <button
         type="button"
         onClick={() => onToggle(k)}
-        className="inline-flex items-center whitespace-nowrap font-semibold text-zinc-200 hover:text-white"
+        className="flex w-full items-center whitespace-nowrap font-semibold text-zinc-200 hover:text-white"
         aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
       >
         {children}
@@ -147,6 +154,7 @@ function Th({
 export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   const [sortKey, setSortKey] = React.useState<SortKey>("created_at");
   const [sortDir, setSortDir] = React.useState<SortDir>("desc");
+  const [selectedMovieId, setSelectedMovieId] = React.useState<string | null>(null);
 
   const sorted = React.useMemo(() => {
     const copy = [...(movies || [])];
@@ -167,6 +175,21 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
     }
   };
 
+  const statusLabels: Record<string, string> = {
+    watched: "視聴済",
+    wishlist: "視たい"
+  };
+  
+  const jpDate = (dateStr?: string | null) => {
+    if (!dateStr) return "";
+
+    return new Date(dateStr).toLocaleString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+  };
+
   if (!movies || !movies.length) {
     return (
       <div className="rounded-md border p-4">
@@ -177,10 +200,45 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
 
   return (
     <div className="rounded-md border p-4">
+      <div className="flex flex-row justify-between w-full mb-4 items-center">
+        <h2 className="text-xl font-semibold">登録映画一覧</h2>
+        <div className="flex gap-2">
+          {selectedMovieId ? (
+            <Link href={`/main/registration?editId=${selectedMovieId}`}>
+              <Button
+                variant="outline"
+                className="bg-blue-600 border-none text-white shadow-sm transition hover:bg-blue-500"
+              >
+                編集
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="outline"
+              disabled
+              className="bg-zinc-800 border-none text-zinc-500 cursor-not-allowed shadow-sm"
+            >
+              編集
+            </Button>
+          )}
+
+          <Link className="flex justify-center" href="/main">
+            <Button variant="outline" size="icon"
+              className=" bg-red-900 border-none text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
+            >
+              <SlActionUndo />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-zinc-800 text-left">
+              <th className="py-2 pr-4 font-semibold whitespace-nowrap">
+                ポスター
+              </th>
               <Th k="title" active={sortKey === "title"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
                 タイトル
               </Th>
@@ -196,45 +254,80 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
               <Th k="rating" active={sortKey === "rating"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
                 評価
               </Th>
+              <Th k="tmdb_vote_average" active={sortKey === "tmdb_vote_average"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
+                TMDB平均評価
+              </Th>
               <Th k="memo" active={sortKey === "memo"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
                 メモ
               </Th>
               <Th k="watched_at" active={sortKey === "watched_at"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
                 視聴日
               </Th>
-              <Th k="created_at" active={sortKey === "created_at"} dir={sortDir} onToggle={onToggle} className="py-2 pr-2">
+              <Th k="created_at" active={sortKey === "created_at"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
                 作成日
               </Th>
+              <th className="py-2 pr-2">
+              TMDBリンク
+              </th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((item) => (
-              <tr key={item.id} className="border-b border-zinc-900/80 hover:bg-zinc-950/60">
+              <tr 
+                key={item.id} 
+                className={`border-b border-zinc-900/80 cursor-pointer ${
+                  selectedMovieId === item.id 
+                    ? "bg-zinc-800" 
+                    : "hover:bg-zinc-950/60"
+                }`}
+                onClick={() => setSelectedMovieId(item.id === selectedMovieId ? null : item.id)}
+              >
+                <td className="py-2 pr-4">
+                  {item.movies?.poster_path ? (
+                    <img src={`https://image.tmdb.org/t/p/w92${item.movies.poster_path}`} alt="poster" className="w-10 h-14 object-cover rounded bg-zinc-800" />
+                  ) : (
+                    <div className="w-10 h-14 bg-zinc-800 rounded flex items-center justify-center text-[10px] text-zinc-500">No Img</div>
+                  )}
+                </td>
                 <td className="py-2 pr-4 max-w-[280px]">
-                  <div className="truncate">{item.movies?.[0]?.title ?? ""}</div>
+                  <div className="truncate">{item.movies?.title ?? ""}</div>
                 </td>
                 <td className="py-2 pr-4 whitespace-nowrap text-red-100">
-                  {item.movies?.[0]?.year ? `${item.movies[0]?.year}年` : ""}
+                  {item.movies?.year ? `${item.movies.year}年` : ""}
                 </td>
                 <td className="py-2 pr-4 max-w-[220px] text-red-100">
-                  <div className="truncate">{item.movies?.[0]?.genres ?? ""}</div>
+                  <div className="truncate">{item.movies?.genres ? item.movies.genres.join(", ") : ""}</div>
                 </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-red-100">{item.status ?? ""}</td>
+                <td className="py-2 pr-4 whitespace-nowrap text-red-100">{statusLabels[item.status!] ?? item.status ?? ""}</td>
                 <td className="py-2 pr-4 whitespace-nowrap text-yellow-400">
-                  {item.user_reviews?.[0]?.rating !== null &&
-                  item.user_reviews?.[0]?.rating !== undefined &&
-                  item.user_reviews?.[0]?.rating !== ""
-                    ? String(item.user_reviews?.[0]?.rating)
+                  {item.user_reviews?.rating != null
+                    ? String(item.user_reviews.rating)
                     : ""}
+                </td>
+                <td className="py-2 pr-4 whitespace-nowrap text-blue-300">
+                  {item.movies?.tmdb_vote_average?.toFixed(2) ?? ""}
                 </td>
                 <td className="py-2 pr-4 max-w-[240px] text-xs text-gray-400">
                   <div className="truncate">{item.memo ?? ""}</div>
                 </td>
                 <td className="py-2 pr-4 whitespace-nowrap text-yellow-200">
-                  {item.watched_at ? String(item.watched_at) : ""}
+                  {jpDate(item.watched_at)}
                 </td>
-                <td className="py-2 pr-2 whitespace-nowrap text-yellow-200">
-                  {item.created_at ? String(item.created_at) : ""}
+                <td className="py-2 pr-4 whitespace-nowrap text-yellow-200">
+                  {jpDate(item.created_at)}
+                </td>
+                <td className="py-2 pr-2 whitespace-nowrap">
+                  {item.movies?.tmdb_id && (
+                    <a 
+                      href={`https://www.themoviedb.org/movie/${item.movies.tmdb_id}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-400 text-xs underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      TMDB
+                    </a>
+                  )}
                 </td>
               </tr>
             ))}
@@ -244,4 +337,5 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
     </div>
   );
 }
+//{jpDate(item.watched_at)}
 

@@ -59,16 +59,12 @@
 
 
 To Do memo
+・登録のエラー表示
 
-・SQLのstatus日本語書き換え
-・moviesにuser movies以外のデータのらない原因修正
-・日付YMD表示
-
-・レコメンド作成
+・レコメンド機能作成
+・レコメンド表示
 
 ・ユーザーセッティング作成
-
-・tmdbの追加
 
 ・別ユーザーの同映画重複登録禁止コード
     insert into movies (title, year, genres)

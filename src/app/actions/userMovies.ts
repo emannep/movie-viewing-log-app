@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 const UpsertSchema = z.object({
   movie_id: z.string().uuid(),
@@ -12,7 +12,7 @@ const UpsertSchema = z.object({
 });
 
 export async function upsertUserMovie(input: unknown) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error("Not authenticated");
 

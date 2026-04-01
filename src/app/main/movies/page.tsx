@@ -1,8 +1,5 @@
 
 import { movieAction } from '@/app/actions/movies';
-import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { SlActionUndo } from "react-icons/sl";
 import { MoviesTable } from "./MoviesTable";
 
 
@@ -12,21 +9,7 @@ export default async function MoviesPage() {
   return (
     <div className="p-4 mx-auto max-w-3xl space-y-2">
 
-      <div className="flex flex-raw justify-between w-full">
-        <h2 className="text-xl font-semibold">登録映画一覧</h2>
-        <div>
-            <Link
-              className="flex justify-center"
-              href="/main"
-            >
-              <Button variant="outline" size="icon"
-                className=" bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
-              >
-                <SlActionUndo />
-              </Button>
-            </Link>
-        </div>
-      </div>
+
 
       <MoviesTable movies={movies} />
 
