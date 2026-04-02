@@ -45,8 +45,11 @@ export default async function MainPage() {
             <Link className="p-4 bg-red-900 rounded-2xl" href="/main/movies">
               映画一覧・編集
             </Link>
-            <Link className="p-4 bg-red-900 rounded-2xl" href="/main/settings">
-              プロフィール・設定
+            <Link className="p-4 bg-red-900 rounded-2xl" href="/main/collection">
+              🏛️ コレクション
+            </Link>
+            <Link className="p-4 bg-red-900 rounded-2xl" href="/main/profile">
+              プロフィール
             </Link>
           </div>
         </main>

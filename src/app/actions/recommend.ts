@@ -1,27 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-
-const GENRE_ID_MAP: Record<string, number> = {
-  "アクション": 28,
-  "アドベンチャー": 12,
-  "アニメーション": 16,
-  "コメディ": 35,
-  "犯罪": 80,
-  "ドキュメンタリー": 99,
-  "ドラマ": 18,
-  "ファミリー": 10751,
-  "ファンタジー": 14,
-  "歴史": 36,
-  "ホラー": 27,
-  "音楽": 10402,
-  "ミステリー": 9648,
-  "ロマンス": 10749,
-  "SF": 878,
-  "スリラー": 53,
-  "戦争": 10752,
-  "西部劇": 37,
-};
+import { GENRE_ID_MAP } from "@/lib/genre-map";
 
 export type RecommendedMovie = {
   tmdb_id: number;
@@ -89,7 +69,7 @@ export async function getRecommendations(limit = 12): Promise<RecommendedMovie[]
 
   const url = new URL("https://api.themoviedb.org/3/discover/movie");
   url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("with_genres", tmdbGenreIds.join(","));
+  url.searchParams.set("with_genres", tmdbGenreIds.join("|"));
   url.searchParams.set("sort_by", "vote_average.desc");
   url.searchParams.set("vote_count.gte", "500");
   url.searchParams.set("language", "ja-JP");

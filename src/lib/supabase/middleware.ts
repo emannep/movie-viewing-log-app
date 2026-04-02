@@ -30,11 +30,11 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isLoginPage = pathname.startsWith("/login");
+  const isLoginPage = pathname.startsWith("/auth/login");
   const isMainPage = pathname.startsWith("/main");
 
   if (!user && isMainPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   if (user && isLoginPage) {

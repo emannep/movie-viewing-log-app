@@ -1,7 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getRecommendations } from "@/app/actions/recommend";
 
 export default async function RecommendMoviesPage() {
+  const supabase = await createClient();
+  const { data: userRes, error } = await supabase.auth.getUser();
+  if (error || !userRes.user) redirect("/auth/login");
+
   const movies = await getRecommendations(12);
 
   return (
