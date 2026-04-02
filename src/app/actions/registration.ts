@@ -4,6 +4,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { checkAndUnlockCollections, getUnlockedGenres } from "./collections";
+import { awardPoints } from "./points";
 
 export async function registerMovie(formData: FormData) {
   const supabase = await createClient();
@@ -94,7 +96,18 @@ export async function registerMovie(formData: FormData) {
       throw new Error(error.message);
     }
 
+    // 視聴済み登録のみポイント付与 & コレクション解放チェック
+    if (status === "watched" && genresArray.length > 0) {
+      const unlockedGenres = await getUnlockedGenres(userId);
+      const isCollectionMovie = genresArray.some((g) => unlockedGenres.has(g));
+      await Promise.all([
+        awardPoints(userId, isCollectionMovie),
+        checkAndUnlockCollections(userId, genresArray),
+      ]);
+    }
+
     revalidatePath("/main/movies");
+    revalidatePath("/main/collection");
   } catch (e) {
     console.error("movies クエリ実行エラー:", e);
     throw e;
