@@ -21,8 +21,8 @@ export type Collection = {
   roomIndex: number;
 };
 
-/** TMDB から指定ジャンル×年代の上位10作品を取得 */
-async function fetchTmdbTop10(genre: string, decade: number): Promise<Omit<CollectionMovie, "collected">[]> {
+/** TMDB から指定ジャンル×年代の上位5作品を取得 */
+async function fetchTmdbTop5(genre: string, decade: number): Promise<Omit<CollectionMovie, "collected">[]> {
   const genreId = GENRE_ID_MAP[genre];
   if (!genreId) return [];
 
@@ -43,7 +43,7 @@ async function fetchTmdbTop10(genre: string, decade: number): Promise<Omit<Colle
   if (!res.ok) return [];
 
   const data = await res.json();
-  return (data.results ?? []).slice(0, 10).map((m: any, i: number) => ({
+  return (data.results ?? []).slice(0, 5).map((m: any, i: number) => ({
     tmdb_id: m.id,
     title: m.title,
     year: m.release_date?.substring(0, 4) ?? "",
@@ -198,7 +198,7 @@ export async function getUserCollections(): Promise<Collection[]> {
 
   const collections = await Promise.all(
     unlocked.map(async (c, i) => {
-      const tmdbMovies = await fetchTmdbTop10(c.genre, c.decade);
+      const tmdbMovies = await fetchTmdbTop5(c.genre, c.decade);
       const movies: CollectionMovie[] = tmdbMovies.map((m) => ({
         ...m,
         collected: watchedTmdbIds.has(m.tmdb_id),

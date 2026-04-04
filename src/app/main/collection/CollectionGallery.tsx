@@ -4,36 +4,46 @@ import type { Collection } from "@/app/actions/collections";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
 
+const RANK_STYLES: Record<number, { bg: string; text: string }> = {
+  1: { bg: "bg-yellow-400",  text: "text-zinc-900" },
+  2: { bg: "bg-slate-300",   text: "text-zinc-900" },
+  3: { bg: "bg-amber-600",   text: "text-zinc-100" },
+};
+
 function PosterSlot({ movie }: { movie: Collection["movies"][number] }) {
+  const rankStyle = RANK_STYLES[movie.rank] ?? { bg: "bg-zinc-700", text: "text-zinc-200" };
+
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative w-16 h-24 rounded overflow-hidden border border-amber-900/40">
-        {movie.collected && movie.poster_path ? (
+    <div className="flex flex-col items-center gap-1.5 w-20">
+      <div className="relative w-20 h-[120px] rounded overflow-hidden border border-amber-900/40 shrink-0">
+        {movie.poster_path ? (
           <img
             src={`${TMDB_IMG}${movie.poster_path}`}
             alt={movie.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${!movie.collected ? "opacity-30 grayscale" : ""}`}
           />
         ) : (
           <div className="w-full h-full bg-zinc-800 flex flex-col items-center justify-center gap-1">
-            {movie.collected ? (
-              <span className="text-amber-400 text-xs text-center px-1 leading-tight">
-                {movie.title}
-              </span>
-            ) : (
-              <>
-                <span className="text-zinc-600 text-2xl">?</span>
-                <span className="text-zinc-700 text-xs">{movie.year}</span>
-              </>
-            )}
+            <span className={`text-xs text-center px-1 leading-tight ${movie.collected ? "text-amber-400" : "text-zinc-600"}`}>
+              {movie.title}
+            </span>
           </div>
         )}
+        {/* ランクバッジ */}
+        <div className={`absolute top-1 left-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${rankStyle.bg} ${rankStyle.text}`}>
+          {movie.rank}
+        </div>
         {movie.collected && (
           <div className="absolute inset-0 ring-1 ring-amber-400/60 rounded pointer-events-none" />
         )}
+        {!movie.collected && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-zinc-500 text-2xl">?</span>
+          </div>
+        )}
       </div>
-      <span className="text-xs text-zinc-500 w-16 truncate text-center">
-        {movie.collected ? movie.title : "???"}
+      <span className={`text-[11px] w-20 text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-zinc-500"}`}>
+        {movie.title}
       </span>
     </div>
   );
@@ -70,7 +80,7 @@ function CollectionCase({ collection }: { collection: Collection }) {
       </div>
 
       {/* ポスターグリッド */}
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-nowrap gap-3 justify-center">
         {collection.movies.map((movie) => (
           <PosterSlot key={movie.tmdb_id} movie={movie} />
         ))}
@@ -101,7 +111,7 @@ function Room({
       </div>
 
       {/* コレクションケース */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="flex flex-col gap-4 sm:grid-cols-2">
         {collections.map((c) => (
           <CollectionCase key={`${c.genre}-${c.decade}`} collection={c} />
         ))}

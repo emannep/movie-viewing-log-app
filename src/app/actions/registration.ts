@@ -115,6 +115,40 @@ export async function registerMovie(formData: FormData) {
   redirect("/main/movies");
 }
 
+export async function deleteMovie(id: string) {
+  const supabase = await createClient();
+  const { data: userRes, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !userRes.user) redirect("/auth/login");
+
+  // 削除前に movie_id を取得しておく
+  const { data: target, error: fetchErr } = await supabase
+    .from("user_movies")
+    .select("movie_id")
+    .eq("id", id)
+    .eq("user_id", userRes.user.id)
+    .single();
+  if (fetchErr || !target) throw new Error("対象の映画が見つかりません");
+
+  const { error: deleteErr } = await supabase
+    .from("user_movies")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userRes.user.id);
+  if (deleteErr) throw new Error(deleteErr.message);
+
+  // 他のユーザーが同じ映画を登録していなければ movies からも削除
+  const { count } = await supabase
+    .from("user_movies")
+    .select("id", { count: "exact", head: true })
+    .eq("movie_id", target.movie_id);
+  if (count === 0) {
+    await supabase.from("movies").delete().eq("id", target.movie_id);
+  }
+
+  revalidatePath("/main/movies");
+  revalidatePath("/main/collection");
+}
+
 export async function updateMovie(formData: FormData) {
   const supabase = await createClient();
 

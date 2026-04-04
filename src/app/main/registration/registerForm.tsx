@@ -1,61 +1,92 @@
-
 'use client'
 
 import * as React from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { SlActionUndo } from "react-icons/sl"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format, isValid, parseISO } from "date-fns"
 import { FaRegCalendarAlt } from "react-icons/fa"
 import { registerMovie, updateMovie } from "@/app/actions/registration"
+import { ChevronLeft, X } from "lucide-react"
+import { ja } from "date-fns/locale"
 
-export default function RegisterForm({ genres, initialData }: { genres: any[], initialData?: any }) {
-  const currentYear = new Date().getFullYear()
-  const maxYear = currentYear + 10
+const TMDB_IMG = "https://image.tmdb.org/t/p/w92";
 
-  const toDateValue = (d: Date) => format(d, "yyyy-MM-dd")
+const TMDB_GENRE_MAP: Record<number, string> = {
+  28: "アクション",
+  12: "アドベンチャー",
+  16: "アニメーション",
+  35: "コメディ",
+  80: "犯罪",
+  99: "ドキュメンタリー",
+  18: "ドラマ",
+  10751: "ファミリー",
+  14: "ファンタジー",
+  36: "歴史",
+  27: "ホラー",
+  10402: "音楽",
+  9648: "ミステリー",
+  10749: "ロマンス",
+  878: "SF",
+  10770: "TVムービー",
+  53: "スリラー",
+  10752: "戦争",
+  37: "西部劇",
+};
+
+const fieldClass =
+  "w-full rounded-lg bg-zinc-900 border border-amber-900/30 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-amber-700/60 transition-colors";
+
+const labelClass = "block text-xs text-amber-700/80 tracking-widest uppercase mb-1";
+
+const sectionClass =
+  "bg-zinc-900/60 border border-amber-900/20 rounded-xl p-3 flex flex-col gap-2";
+
+export default function RegisterForm({ genres, initialData }: { genres: any[]; initialData?: any }) {
+  const currentYear = new Date().getFullYear();
+  const maxYear = currentYear + 10;
+
+  const toDateValue = (d: Date) => format(d, "yyyy-MM-dd");
   const parseDateValue = (value: string) => {
-    const dt = parseISO(value)
-    return isValid(dt) ? dt : undefined
-  }
+    const dt = parseISO(value);
+    return isValid(dt) ? dt : undefined;
+  };
 
   function DateTextAndCalendarField({
     label,
     name,
     defaultValue,
   }: {
-    label: string
-    name: string
-    defaultValue?: string
+    label: string;
+    name: string;
+    defaultValue?: string;
   }) {
-    const [inputValue, setInputValue] = React.useState(defaultValue ?? "")
+    const [inputValue, setInputValue] = React.useState(defaultValue ?? "");
     const [selected, setSelected] = React.useState<Date | undefined>(() =>
       defaultValue ? parseDateValue(defaultValue) : undefined
-    )
+    );
 
     const handleSelect = (d: Date | undefined) => {
-      setSelected(d)
-      if (d) setInputValue(toDateValue(d))
-    }
+      setSelected(d);
+      if (d) setInputValue(toDateValue(d));
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      setInputValue(value)
-      const parsed = parseDateValue(value)
-      if (parsed) setSelected(parsed)
-    }
+      const value = e.target.value;
+      setInputValue(value);
+      const parsed = parseDateValue(value);
+      if (parsed) setSelected(parsed);
+    };
 
     const handleBlur = () => {
-      const parsed = parseDateValue(inputValue)
-      if (parsed) setInputValue(toDateValue(parsed))
-    }
+      const parsed = parseDateValue(inputValue);
+      if (parsed) setInputValue(toDateValue(parsed));
+    };
 
     return (
       <div>
-        <label className="block text-sm font-medium">{label}</label>
-        <div className="mt-1 flex w-full items-center justify-between gap-2 rounded border px-2 py-1">
+        <label className={labelClass}>{label}</label>
+        <div className="flex w-full items-center gap-2 rounded-lg border border-amber-900/30 bg-zinc-900 px-3 py-2">
           <input
             name={name}
             type="text"
@@ -64,68 +95,82 @@ export default function RegisterForm({ genres, initialData }: { genres: any[], i
             value={inputValue}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            className="w-[160px] px-2 py-1"
+            className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none"
             pattern="\d{4}-\d{2}-\d{2}"
           />
-
           <Popover>
             <PopoverTrigger asChild>
-              <Button size="icon" type="button">
-                <FaRegCalendarAlt />
-              </Button>
+              <button
+                type="button"
+                className="text-amber-700 hover:text-amber-500 transition-colors"
+              >
+                <FaRegCalendarAlt size={16} />
+              </button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0 bg-zinc-900 border-amber-900/40" align="start">
               <Calendar
                 mode="single"
                 selected={selected}
                 onSelect={handleSelect}
+                locale={ja}
+                captionLayout="dropdown"
+                className="[--cell-size:2.5rem] text-zinc-100"
+                classNames={{
+                  month_caption: "flex justify-center items-center h-[--cell-size] w-full px-[--cell-size] text-amber-500/90 font-semibold",
+                  dropdowns: "flex h-[--cell-size] w-full items-center justify-center gap-1.5 text-sm font-medium",
+                  dropdown_root: "relative rounded-lg border border-amber-900/30 bg-zinc-900",
+                  caption_label: "flex items-center gap-1 px-2 py-1 text-sm text-zinc-100 select-none",
+                  weekday: "w-full text-amber-700/60",
+                  today: "bg-amber-900/40 text-amber-300 rounded-md data-[selected=true]:rounded-none",
+                  outside: "text-zinc-600 opacity-50",
+                  disabled: "text-zinc-700 opacity-40",
+                }}
               />
             </PopoverContent>
           </Popover>
         </div>
       </div>
-    )
+    );
   }
 
-  const today = toDateValue(new Date())
-
+  const today = toDateValue(new Date());
   const isEdit = !!initialData;
   const actionFn = isEdit ? updateMovie : registerMovie;
 
   const defaultStatus = initialData?.status ?? "watched";
   const defaultRating = initialData?.user_reviews?.rating ?? "";
   const defaultMemo = initialData?.memo ?? "";
-  const defaultWatchedAt = initialData?.watched_at ? toDateValue(new Date(initialData.watched_at)) : today;
-  const defaultCreatedAt = initialData?.created_at ? toDateValue(new Date(initialData.created_at)) : today;
+  const defaultWatchedAt = initialData?.watched_at
+    ? toDateValue(new Date(initialData.watched_at))
+    : today;
+  const defaultCreatedAt = initialData?.created_at
+    ? toDateValue(new Date(initialData.created_at))
+    : today;
 
   const [title, setTitle] = React.useState(initialData?.movies?.title ?? "");
   const [year, setYear] = React.useState(initialData?.movies?.year ?? "");
   const [genre, setGenre] = React.useState(initialData?.movies?.genres?.[0] ?? "");
-  
   const [tmdbId, setTmdbId] = React.useState(initialData?.movies?.tmdb_id ?? "");
   const [posterPath, setPosterPath] = React.useState(initialData?.movies?.poster_path ?? "");
   const [voteAverage, setVoteAverage] = React.useState(initialData?.movies?.tmdb_vote_average ?? "");
-  
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
 
   const handleSearch = async () => {
-    if (!title) {
-      alert("タイトルを入力してください。");
-      return;
-    }
+    if (!title) { alert("タイトルを入力してください。"); return; }
     setIsSearching(true);
     setSearchResults([]);
     try {
-      const res = await fetch(`/api/tmdb/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`);
+      const res = await fetch(
+        `/api/tmdb/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`
+      );
       const data = await res.json();
       if (data.results) {
         setSearchResults(data.results.slice(0, 5));
       } else {
         alert("検索結果がありませんでした。");
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       alert("エラーが発生しました。");
     } finally {
       setIsSearching(false);
@@ -134,168 +179,195 @@ export default function RegisterForm({ genres, initialData }: { genres: any[], i
 
   const handleSelectMovie = (m: any) => {
     setTitle(m.title);
-    if (m.release_date) {
-      setYear(m.release_date.substring(0, 4));
-    }
+    if (m.release_date) setYear(m.release_date.substring(0, 4));
     setTmdbId(m.id);
     setPosterPath(m.poster_path);
     setVoteAverage(m.vote_average);
+    if (m.genre_ids?.length > 0) {
+      for (const gid of m.genre_ids) {
+        const tmdbName = TMDB_GENRE_MAP[gid];
+        if (tmdbName) {
+          const match = genres.find((g: any) => g.name === tmdbName);
+          if (match) { setGenre(match.name); break; }
+        }
+      }
+    }
     setSearchResults([]);
   };
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-8 p-4">
-      <div className="flex w-full justify-between">
-        <h1 className="text-2xl font-bold">{isEdit ? "映画を編集" : "映画を登録"}</h1>
-        <div>
-          <Link className="flex justify-center" href="/main">
-            <Button
-              variant="outline"
-              size="icon"
-              className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
-            >
-              <SlActionUndo />
-            </Button>
-          </Link>
-        </div>
-      </div>
+    <div className="w-full flex flex-col gap-3">
 
-      <form action={actionFn} className="space-y-4 rounded-md border p-4 shadow-sm">
+      {/* ヘッダー */}
+      <header className="flex items-center justify-between pt-1">
+        <Link
+          href="/main"
+          className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          <ChevronLeft size={16} />
+          <span className="text-sm">ホーム</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="h-px w-8 bg-amber-900/50" />
+          <h1 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">
+            {isEdit ? "作品を編集" : "作品を登録"}
+          </h1>
+          <div className="h-px w-8 bg-amber-900/50" />
+        </div>
+        <div className="w-16" />
+      </header>
+
+      <form action={actionFn} className="flex flex-col gap-3">
         {isEdit && <input type="hidden" name="id" value={initialData.id} />}
         {isEdit && <input type="hidden" name="movie_id" value={initialData.movies.id} />}
-        
         <input type="hidden" name="tmdb_id" value={tmdbId} />
         <input type="hidden" name="poster_path" value={posterPath} />
         <input type="hidden" name="tmdb_vote_average" value={voteAverage} />
 
-        <div>
-          <label className="block text-sm font-medium">タイトル</label>
-          <div className="flex gap-2 items-end">
-            <input
-              name="title"
-              className="mt-1 w-full rounded border px-2 py-1 flex-1"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <Button
-              type="button"
-              onClick={handleSearch}
-              disabled={isSearching}
-              className="mb-[2px]"
-            >
-              {isSearching ? "検索中..." : "TMDBで検索"}
-            </Button>
-          </div>
-          
-          {searchResults.length > 0 && (
-            <div className="mt-2 rounded border bg-zinc-900 shadow p-2">
-              <p className="mb-2 text-sm text-zinc-300 font-semibold">検索結果（クリックして反映）:</p>
-              <ul className="space-y-1">
-                {searchResults.map((m) => (
-                  <li 
-                    key={m.id} 
-                    className="cursor-pointer rounded p-2 hover:bg-zinc-800 transition flex gap-3 items-center"
-                    onClick={() => handleSelectMovie(m)}
-                  >
-                    {m.poster_path ? (
-                      <img src={`https://image.tmdb.org/t/p/w92${m.poster_path}`} alt={m.title} className="w-8 h-12 object-cover rounded bg-zinc-800" />
-                    ) : (
-                      <div className="w-8 h-12 bg-zinc-800 rounded flex items-center justify-center text-[10px] text-zinc-500">No Img</div>
-                    )}
-                    <div>
-                      <div className="font-medium text-white">{m.title}</div>
-                      <div className="text-xs text-zinc-400">{m.release_date?.substring(0, 4)}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+        {/* タイトル検索 */}
+        <div className={sectionClass}>
+          <div className="relative">
+            <label className={labelClass}>タイトル</label>
+            <div className="flex gap-2 items-center">
+              <input
+                name="title"
+                className={`${fieldClass} flex-1`}
+                required
+                value={title}
+                placeholder="映画タイトル"
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="shrink-0 bg-amber-900/60 hover:bg-amber-800/70 disabled:opacity-50 text-amber-200 text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+              >
+                {isSearching ? "検索中..." : "TMDB検索"}
+              </button>
             </div>
-          )}
+
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-20 mt-1 rounded-lg border border-amber-900/40 bg-zinc-900 shadow-xl overflow-hidden">
+                <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                  <p className="text-[10px] text-amber-700/70 tracking-widest uppercase">
+                    検索結果（タップして反映）
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchResults([])}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <ul>
+                  {searchResults.map((m) => (
+                    <li
+                      key={m.id}
+                      className="cursor-pointer flex gap-3 items-center px-3 py-2 hover:bg-amber-900/20 active:bg-amber-900/40 transition-colors border-t border-amber-900/20"
+                      onClick={() => handleSelectMovie(m)}
+                    >
+                      {m.poster_path ? (
+                        <img
+                          src={`${TMDB_IMG}${m.poster_path}`}
+                          alt={m.title}
+                          className="w-8 h-12 object-cover rounded bg-zinc-800 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-12 bg-zinc-800 rounded flex items-center justify-center text-[10px] text-zinc-500 shrink-0">
+                          No Img
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-zinc-100 text-sm font-medium truncate">{m.title}</p>
+                        <p className="text-amber-700/70 text-xs">{m.release_date?.substring(0, 4)}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">映画公開年度</label>
-          <input
-            name="year"
-            type="number"
-            min="1888"
-            max={maxYear}
-            className="mt-1 w-full rounded border px-2 py-1"
-            required
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          />
+        {/* 基本情報 */}
+        <div className={sectionClass}>
+          <div>
+            <label className={labelClass}>公開年度</label>
+            <input
+              name="year"
+              type="number"
+              min="1888"
+              max={maxYear}
+              className={fieldClass}
+              required
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>ジャンル</label>
+            <select
+              name="genres"
+              className={fieldClass}
+              required
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+            >
+              <option value="">ジャンルを選択</option>
+              {genres?.map((g: any) => (
+                <option key={g.id} value={g.name}>{g.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">ジャンル</label>
-          <select
-            name="genres"
-            className="mt-1 w-full rounded border px-2 py-1"
-            required
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-          >
-            <option value="">
-              ジャンルを選択してください！ （ メインだと思うジャンルを選択 ）
-            </option>
-            {genres?.map((g: any) => (
-              <option key={g.id} value={g.name}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* 鑑賞記録 */}
+        <div className={sectionClass}>
+          <div>
+            <label className={labelClass}>ステータス</label>
+            <select name="status" className={fieldClass} defaultValue={defaultStatus}>
+              <option value="watched">視聴済</option>
+              <option value="wishlist">視たい</option>
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">ステータス</label>
-          <select name="status" className="mt-1 w-full rounded border px-2 py-1" defaultValue={defaultStatus}>
-            <option value="watched">視聴済</option>
-            <option value="wishlist">視たい</option>
-          </select>
-        </div>
+          <div>
+            <label className={labelClass}>評価（1〜5）</label>
+            <select name="rating" className={fieldClass} defaultValue={defaultRating}>
+              <option value="0">未評価</option>
+              <option value="1">★☆☆☆☆</option>
+              <option value="2">★★☆☆☆</option>
+              <option value="3">★★★☆☆</option>
+              <option value="4">★★★★☆</option>
+              <option value="5">★★★★★</option>
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">評価（1〜5）</label>
-          <select name="rating" className="mt-1 w-full rounded border px-2 py-1" defaultValue={defaultRating}>
-            <option value="0"></option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </div>
+          <div>
+            <label className={labelClass}>メモ</label>
+            <textarea
+              name="memo"
+              className={`${fieldClass} resize-none`}
+              rows={2}
+              placeholder="感想・メモ"
+              defaultValue={defaultMemo}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">メモ</label>
-          <textarea
-            name="memo"
-            className="mt-1 w-full rounded border px-2 py-1"
-            rows={3}
-            defaultValue={defaultMemo}
-          />
+          <DateTextAndCalendarField label="視聴日" name="watched_at" defaultValue={defaultWatchedAt} />
+          <DateTextAndCalendarField label="ページ作製日" name="created_at" defaultValue={defaultCreatedAt} />
         </div>
-
-        <DateTextAndCalendarField
-          label="視聴日"
-          name="watched_at"
-          defaultValue={defaultWatchedAt}
-        />
-        <DateTextAndCalendarField
-          label="ページ作製日"
-          name="created_at"
-          defaultValue={defaultCreatedAt}
-        />
 
         <button
           type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          className="w-full py-3 rounded-xl bg-amber-800 hover:bg-amber-700 text-amber-100 font-semibold text-sm tracking-wide transition-colors shadow-lg shadow-amber-950/30"
         >
-          {isEdit ? "更新" : "登録"}
+          {isEdit ? "更新する" : "登録する"}
         </button>
       </form>
     </div>
-  )
+  );
 }

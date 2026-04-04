@@ -19,6 +19,7 @@ export type { CrownRank } from "@/lib/points-utils";
 
 // ────────────────────────────────────────────────
 // ポイント付与（映画登録時に呼び出す）
+// user_points テーブルに累計で upsert する
 // ────────────────────────────────────────────────
 export async function awardPoints(
   userId: string,
@@ -26,39 +27,31 @@ export async function awardPoints(
 ): Promise<void> {
   const supabase = await createClient();
   const points = isCollectionMovie ? 2 : 1;
-  const seasonKey = getSeasonKey(new Date());
 
   const { data: existing } = await supabase
-    .from("user_season_levels")
-    .select("points")
+    .from("user_points")
+    .select("total_points")
     .eq("user_id", userId)
-    .eq("season_key", seasonKey)
     .single();
 
   if (existing) {
     await supabase
-      .from("user_season_levels")
-      .update({ points: existing.points + points, updated_at: new Date().toISOString() })
-      .eq("user_id", userId)
-      .eq("season_key", seasonKey);
+      .from("user_points")
+      .update({
+        total_points: existing.total_points + points,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
   } else {
     await supabase
-      .from("user_season_levels")
-      .insert({ user_id: userId, season_key: seasonKey, points });
+      .from("user_points")
+      .insert({ user_id: userId, total_points: points });
   }
 }
 
 // ────────────────────────────────────────────────
 // プロフィールページ用データ取得
 // ────────────────────────────────────────────────
-export type SeasonRecord = {
-  seasonKey: string;
-  seasonLabel: string;
-  points: number;
-  level: number;
-  title: string;
-};
-
 export type CrownInfo = {
   rank: string;
   label: string;
@@ -68,8 +61,9 @@ export type CrownInfo = {
 };
 
 export type ProfileData = {
-  currentSeason: SeasonRecord;
-  seasonHistory: SeasonRecord[];
+  totalPoints: number;
+  level: number;
+  title: string;
   seasonalCrown: CrownInfo;
   annualCrown: CrownInfo;
 };
@@ -81,14 +75,13 @@ export async function getProfileData(): Promise<ProfileData | null> {
 
   const userId = auth.user.id;
   const now = new Date();
-  const seasonKey = getSeasonKey(now);
 
-  const [{ data: seasonRows }, { data: watchedRows }] = await Promise.all([
+  const [{ data: pointsRow }, { data: watchedRows }] = await Promise.all([
     supabase
-      .from("user_season_levels")
-      .select("season_key, points")
+      .from("user_points")
+      .select("total_points")
       .eq("user_id", userId)
-      .order("season_key", { ascending: false }),
+      .single(),
     supabase
       .from("user_movies")
       .select("watched_at")
@@ -97,27 +90,9 @@ export async function getProfileData(): Promise<ProfileData | null> {
       .not("watched_at", "is", null),
   ]);
 
-  const allSeasons: SeasonRecord[] = (seasonRows ?? []).map((r) => {
-    const level = calcLevel(r.points);
-    return {
-      seasonKey: r.season_key,
-      seasonLabel: getSeasonLabel(r.season_key),
-      points: r.points,
-      level,
-      title: LEVEL_TITLES[level],
-    };
-  });
-
-  const currentSeasonRow = allSeasons.find((s) => s.seasonKey === seasonKey);
-  const currentSeason: SeasonRecord = currentSeasonRow ?? {
-    seasonKey,
-    seasonLabel: getSeasonLabel(seasonKey),
-    points: 0,
-    level: 0,
-    title: LEVEL_TITLES[0],
-  };
-
-  const seasonHistory = allSeasons.filter((s) => s.seasonKey !== seasonKey);
+  const totalPoints = pointsRow?.total_points ?? 0;
+  const level = calcLevel(totalPoints);
+  const title = LEVEL_TITLES[level];
 
   const movies = watchedRows ?? [];
 
@@ -137,8 +112,9 @@ export async function getProfileData(): Promise<ProfileData | null> {
   const annualRank = calcCrownRank(annualCount, "annual");
 
   return {
-    currentSeason,
-    seasonHistory,
+    totalPoints,
+    level,
+    title,
     seasonalCrown: {
       rank: seasonRank,
       label: CROWN_LABELS[seasonRank],
