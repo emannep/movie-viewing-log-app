@@ -47,7 +47,7 @@ export async function movieAction() {
   const rows = (data ?? []).map((row: any) => ({
     ...row,
     movies: Array.isArray(row.movies) ? row.movies[0] : row.movies,
-    user_reviews: Array.isArray(row.user_reviews) ? row.user_reviews[0] : row.user_reviews
+    user_reviews: Array.isArray(row.user_reviews) ? row.user_reviews[0] ?? null : row.user_reviews,
   })) as any;
   return rows;
 
