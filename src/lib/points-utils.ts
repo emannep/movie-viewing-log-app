@@ -102,3 +102,12 @@ export const CROWN_COLORS: Record<CrownRank, string> = {
   gold: "text-yellow-400",
   platinum: "text-cyan-200",
 };
+
+// SVGアイコン用のfill/stroke色
+export const CROWN_ICON_COLORS: Record<CrownRank, { fill: string; stroke: string }> = {
+  none:     { fill: "transparent",  stroke: "transparent" },
+  bronze:   { fill: "#CD7F32",      stroke: "#A0522D" },
+  silver:   { fill: "#C0C0C0",      stroke: "#909090" },
+  gold:     { fill: "#FFD700",      stroke: "#DAA520" },
+  platinum: { fill: "#E8F5FF",      stroke: "#90CDF4" },
+};

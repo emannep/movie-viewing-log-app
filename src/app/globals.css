@@ -89,7 +89,7 @@
 
   --radius: 0.625rem;
 
-  --background: oklch(14.1% 0.005 285.823)
+  --background: oklch(10% 0.018 45)
 
   --foreground: oklch(0.141 0.005 285.823);
 
@@ -154,7 +154,7 @@
 
 .dark {
 
-  --background: oklch(0.141 0.005 285.823);
+  --background: oklch(10% 0.018 45);
 
   --foreground: oklch(0.985 0 0);
 

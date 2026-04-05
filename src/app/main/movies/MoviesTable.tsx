@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { SlActionUndo } from "react-icons/sl";
+import { deleteMovie } from "@/app/actions/registration";
+import { useRouter } from "next/navigation";
+import { SlidersHorizontal } from "lucide-react";
 
 type UserMovieRow = {
   id: string;
@@ -26,316 +27,513 @@ type UserMovieRow = {
   } | null;
 };
 
-type SortKey =
-  | "title"
-  | "year"
-  | "genres"
-  | "status"
-  | "rating"
-  | "tmdb_vote_average"
-  | "memo"
-  | "watched_at"
-  | "created_at";
-
+type SortKey = "created_at" | "watched_at" | "rating" | "title" | "year";
 type SortDir = "asc" | "desc";
 
-function toNumber(v: unknown): number | null {
-  if (v === null || v === undefined || v === "") return null;
-  const n = typeof v === "number" ? v : Number(String(v));
-  return Number.isFinite(n) ? n : null;
+const SORT_KEY_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "created_at", label: "登録日" },
+  { key: "watched_at", label: "視聴日" },
+  { key: "rating",     label: "評価" },
+  { key: "title",      label: "タイトル" },
+  { key: "year",       label: "公開年" },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  watched: "視聴済",
+  wishlist: "視たい",
+};
+
+const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
+
+function jpDate(dateStr?: string | null) {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 }
 
-function toTime(v: unknown): number | null {
-  if (v === null || v === undefined || v === "") return null;
-  const t = new Date(String(v)).getTime();
-  return Number.isFinite(t) ? t : null;
-}
-
-function toText(v: unknown): string {
-  if (v === null || v === undefined) return "";
-  return String(v);
-}
-
-function compareNullable(a: unknown, b: unknown, kind: "text" | "number" | "time") {
-  if (kind === "number") {
-    const an = toNumber(a);
-    const bn = toNumber(b);
-    if (an === null && bn === null) return 0;
-    if (an === null) return 1;
-    if (bn === null) return -1;
-    return an - bn;
-  }
-
-  if (kind === "time") {
-    const at = toTime(a);
-    const bt = toTime(b);
-    if (at === null && bt === null) return 0;
-    if (at === null) return 1;
-    if (bt === null) return -1;
-    return at - bt;
-  }
-
-  const as = toText(a);
-  const bs = toText(b);
-  if (!as && !bs) return 0;
-  if (!as) return 1;
-  if (!bs) return -1;
-  return as.localeCompare(bs, "ja");
-}
-
-function getValue(row: UserMovieRow, key: SortKey): unknown {
-  const movie = row.movies;
-  switch (key) {
-    case "title":
-      return movie?.title ?? "";
-    case "year":
-      return movie?.year ?? null;
-    case "genres":
-      return movie?.genres ? movie.genres.join(", ") : "";
-    case "status":
-      return row.status ?? "";
-    case "rating":
-      return row.user_reviews?.rating ?? null;
-    case "tmdb_vote_average":
-      return movie?.tmdb_vote_average ?? null;
-    case "memo":
-      return row.memo ?? "";
-    case "watched_at":
-      return row.watched_at ?? null;
-    case "created_at":
-      return row.created_at ?? null;
-  }
-}
-
-function kindOf(key: SortKey): "text" | "number" | "time" {
-  if (key === "year" || key === "rating") return "number";
-  if (key === "watched_at" || key === "created_at") return "time";
-  return "text";
-}
-
-function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+function RatingStars({ rating }: { rating: number | null | undefined }) {
+  if (rating == null) return <span className="text-zinc-600 text-xs">未評価</span>;
   return (
-    <span className="ml-1 inline-block w-3 text-xs text-zinc-500" aria-hidden="true">
-      {active ? (dir === "asc" ? "▲" : "▼") : ""}
+    <span className="text-xs tracking-tight leading-none">
+      {Array.from({ length: 5 }, (_, i) =>
+        i < rating ? (
+          <span key={i} className="text-amber-400">★</span>
+        ) : (
+          <span key={i} className="text-zinc-700">★</span>
+        )
+      )}
     </span>
   );
 }
 
-function Th({
-  k,
-  active,
-  dir,
-  onToggle,
-  children,
-  className,
-}: {
-  k: SortKey;
-  active: boolean;
-  dir: SortDir;
-  onToggle: (key: SortKey) => void;
-  children: React.ReactNode;
-  className?: string;
-}) {
+function SortKeyDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortKey) => void }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const label = SORT_KEY_OPTIONS.find((o) => o.key === value)?.label ?? value;
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <th className={className}>
+    <div ref={ref} className="relative">
       <button
-        type="button"
-        onClick={() => onToggle(k)}
-        className="flex w-full items-center whitespace-nowrap font-semibold text-zinc-200 hover:text-white"
-        aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 bg-zinc-900 border border-amber-900/40 text-amber-300/80 text-xs rounded-lg px-3 py-1.5 transition-colors hover:border-amber-700 min-w-[72px]"
       >
-        {children}
-        <SortIcon active={active} dir={dir} />
+        <span>{label}</span>
+        <span className="text-amber-800 ml-auto">▾</span>
       </button>
-    </th>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-zinc-900 border border-amber-900/40 rounded-lg overflow-hidden shadow-lg shadow-black/50 min-w-[90px]">
+          {SORT_KEY_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => { onChange(opt.key); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                opt.key === value ? "text-amber-400 bg-amber-950/40" : "text-zinc-300 hover:bg-zinc-800"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
-  const [sortKey, setSortKey] = React.useState<SortKey>("created_at");
-  const [sortDir, setSortDir] = React.useState<SortDir>("desc");
-  const [selectedMovieId, setSelectedMovieId] = React.useState<string | null>(null);
+function SortDirToggle({ value, onChange }: { value: SortDir; onChange: (v: SortDir) => void }) {
+  return (
+    <button
+      onClick={() => onChange(value === "asc" ? "desc" : "asc")}
+      className="flex items-center justify-center bg-zinc-900 border border-amber-900/40 text-amber-300/80 text-sm rounded-lg w-8 h-[30px] transition-colors hover:border-amber-700"
+    >
+      {value === "asc" ? "↑" : "↓"}
+    </button>
+  );
+}
 
-  const sorted = React.useMemo(() => {
-    const copy = [...(movies || [])];
-    const kind = kindOf(sortKey);
-    copy.sort((a, b) => {
-      const base = compareNullable(getValue(a, sortKey), getValue(b, sortKey), kind);
-      return sortDir === "asc" ? base : -base;
-    });
-    return copy;
-  }, [movies, sortKey, sortDir]);
+const RATING_OPTIONS = [
+  { value: 0, label: "未評価" },
+  { value: 1, label: "★1" },
+  { value: 2, label: "★2" },
+  { value: 3, label: "★3" },
+  { value: 4, label: "★4" },
+  { value: 5, label: "★5" },
+];
 
-  const onToggle = (key: SortKey) => {
-    if (sortKey !== key) {
-      setSortKey(key);
-      setSortDir("asc");
-    } else {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
+function FilterPanel({
+  movies,
+  filterStatus,
+  filterGenre,
+  filterRatings,
+  onStatusChange,
+  onGenreChange,
+  onRatingsChange,
+}: {
+  movies: UserMovieRow[];
+  filterStatus: string;
+  filterGenre: string;
+  filterRatings: number[];
+  onStatusChange: (v: string) => void;
+  onGenreChange: (v: string) => void;
+  onRatingsChange: (v: number[]) => void;
+}) {
+  const genres = React.useMemo(() => {
+    const set = new Set<string>();
+    for (const m of movies) {
+      for (const g of m.movies?.genres ?? []) set.add(g);
     }
-  };
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ja"));
+  }, [movies]);
 
-  const statusLabels: Record<string, string> = {
-    watched: "視聴済",
-    wishlist: "視たい"
-  };
-  
-  const jpDate = (dateStr?: string | null) => {
-    if (!dateStr) return "";
-
-    return new Date(dateStr).toLocaleString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-  };
-
-  if (!movies || !movies.length) {
-    return (
-      <div className="rounded-md border p-4">
-        <p className="text-sm text-gray-500">まだ登録された映画がありません！</p>
-      </div>
-    );
-  }
+  const chipClass = (active: boolean) =>
+    `text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+      active
+        ? "bg-amber-800/60 border-amber-600/60 text-amber-200"
+        : "bg-zinc-900 border-zinc-700/50 text-zinc-400 hover:border-zinc-500"
+    }`;
 
   return (
-    <div className="rounded-md border p-4">
-      <div className="flex flex-row justify-between w-full mb-4 items-center">
-        <h2 className="text-xl font-semibold">登録映画一覧</h2>
-        <div className="flex gap-2">
-          {selectedMovieId ? (
-            <Link href={`/main/registration?editId=${selectedMovieId}`}>
-              <Button
-                variant="outline"
-                className="bg-blue-600 border-none text-white shadow-sm transition hover:bg-blue-500"
-              >
-                編集
-              </Button>
-            </Link>
-          ) : (
-            <Button
-              variant="outline"
-              disabled
-              className="bg-zinc-800 border-none text-zinc-500 cursor-not-allowed shadow-sm"
-            >
-              編集
-            </Button>
-          )}
-
-          <Link className="flex justify-center" href="/main">
-            <Button variant="outline" size="icon"
-              className=" bg-red-900 border-none text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
-            >
-              <SlActionUndo />
-            </Button>
-          </Link>
+    <div className="bg-zinc-950/80 border border-amber-900/20 rounded-xl p-3 flex flex-col gap-3">
+      {/* ステータス */}
+      <div>
+        <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">ステータス</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { value: "all", label: "全て" },
+            { value: "watched", label: "視聴済" },
+            { value: "wishlist", label: "視たい" },
+          ].map((s) => (
+            <button key={s.value} onClick={() => onStatusChange(s.value)} className={chipClass(filterStatus === s.value)}>
+              {s.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <table className="w-full min-w-[980px] border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-zinc-800 text-left">
-              <th className="py-2 pr-4 font-semibold whitespace-nowrap">
-                ポスター
-              </th>
-              <Th k="title" active={sortKey === "title"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                タイトル
-              </Th>
-              <Th k="year" active={sortKey === "year"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                年
-              </Th>
-              <Th k="genres" active={sortKey === "genres"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                ジャンル
-              </Th>
-              <Th k="status" active={sortKey === "status"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                ステータス
-              </Th>
-              <Th k="rating" active={sortKey === "rating"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                評価
-              </Th>
-              <Th k="tmdb_vote_average" active={sortKey === "tmdb_vote_average"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                TMDB平均評価
-              </Th>
-              <Th k="memo" active={sortKey === "memo"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                メモ
-              </Th>
-              <Th k="watched_at" active={sortKey === "watched_at"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                視聴日
-              </Th>
-              <Th k="created_at" active={sortKey === "created_at"} dir={sortDir} onToggle={onToggle} className="py-2 pr-4">
-                作成日
-              </Th>
-              <th className="py-2 pr-2">
-              TMDBリンク
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((item) => (
-              <tr 
-                key={item.id} 
-                className={`border-b border-zinc-900/80 cursor-pointer ${
-                  selectedMovieId === item.id 
-                    ? "bg-zinc-800" 
-                    : "hover:bg-zinc-950/60"
-                }`}
-                onClick={() => setSelectedMovieId(item.id === selectedMovieId ? null : item.id)}
+      {/* 評価（OR複数選択） */}
+      <div>
+        <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">
+          評価
+          {filterRatings.length > 0 && (
+            <button
+              onClick={() => onRatingsChange([])}
+              className="ml-2 normal-case text-amber-800/70 hover:text-amber-600 transition-colors"
+            >
+              クリア
+            </button>
+          )}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {RATING_OPTIONS.map((r) => {
+            const active = filterRatings.includes(r.value);
+            return (
+              <button
+                key={r.value}
+                onClick={() => {
+                  if (active) {
+                    onRatingsChange(filterRatings.filter((v) => v !== r.value));
+                  } else {
+                    onRatingsChange([...filterRatings, r.value]);
+                  }
+                }}
+                className={chipClass(active)}
               >
-                <td className="py-2 pr-4">
-                  {item.movies?.poster_path ? (
-                    <img src={`https://image.tmdb.org/t/p/w92${item.movies.poster_path}`} alt="poster" className="w-10 h-14 object-cover rounded bg-zinc-800" />
-                  ) : (
-                    <div className="w-10 h-14 bg-zinc-800 rounded flex items-center justify-center text-[10px] text-zinc-500">No Img</div>
-                  )}
-                </td>
-                <td className="py-2 pr-4 max-w-[280px]">
-                  <div className="truncate">{item.movies?.title ?? ""}</div>
-                </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-red-100">
-                  {item.movies?.year ? `${item.movies.year}年` : ""}
-                </td>
-                <td className="py-2 pr-4 max-w-[220px] text-red-100">
-                  <div className="truncate">{item.movies?.genres ? item.movies.genres.join(", ") : ""}</div>
-                </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-red-100">{statusLabels[item.status!] ?? item.status ?? ""}</td>
-                <td className="py-2 pr-4 whitespace-nowrap text-yellow-400">
-                  {item.user_reviews?.rating != null
-                    ? String(item.user_reviews.rating)
-                    : ""}
-                </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-blue-300">
-                  {item.movies?.tmdb_vote_average?.toFixed(2) ?? ""}
-                </td>
-                <td className="py-2 pr-4 max-w-[240px] text-xs text-gray-400">
-                  <div className="truncate">{item.memo ?? ""}</div>
-                </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-yellow-200">
-                  {jpDate(item.watched_at)}
-                </td>
-                <td className="py-2 pr-4 whitespace-nowrap text-yellow-200">
-                  {jpDate(item.created_at)}
-                </td>
-                <td className="py-2 pr-2 whitespace-nowrap">
-                  {item.movies?.tmdb_id && (
-                    <a 
-                      href={`https://www.themoviedb.org/movie/${item.movies.tmdb_id}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-400 text-xs underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      TMDB
-                    </a>
-                  )}
-                </td>
-              </tr>
+                {r.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ジャンル */}
+      {genres.length > 0 && (
+        <div>
+          <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">ジャンル</p>
+          <div className="flex flex-wrap gap-1.5">
+            <button onClick={() => onGenreChange("all")} className={chipClass(filterGenre === "all")}>
+              全て
+            </button>
+            {genres.map((g) => (
+              <button key={g} onClick={() => onGenreChange(g)} className={chipClass(filterGenre === g)}>
+                {g}
+              </button>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeleteConfirmDialog({
+  title,
+  onConfirm,
+  onCancel,
+  isPending,
+}: {
+  title: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isPending: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative w-full max-w-sm bg-zinc-950 border border-amber-900/40 rounded-2xl p-6 shadow-2xl shadow-black/60 flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-amber-300 font-semibold text-base">削除の確認</h2>
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            「<span className="text-zinc-200 font-medium">{title}</span>」を削除しますか？
+          </p>
+          <p className="text-zinc-600 text-xs">この操作は取り消せません。</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={isPending}
+            className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            キャンセル
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isPending}
+            className="flex-1 py-2.5 rounded-xl bg-red-900 hover:bg-red-800 text-red-100 text-sm font-semibold transition-colors disabled:opacity-50"
+          >
+            {isPending ? "削除中..." : "削除する"}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-//{jpDate(item.watched_at)}
 
+export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
+  const router = useRouter();
+  const [sortKey, setSortKey] = React.useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = React.useState<SortDir>("desc");
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<UserMovieRow | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [showFilter, setShowFilter] = React.useState(false);
+  const [filterStatus, setFilterStatus] = React.useState("all");
+  const [filterGenre, setFilterGenre] = React.useState("all");
+  const [filterRatings, setFilterRatings] = React.useState<number[]>([]);
+
+  const activeFilterCount = [
+    filterStatus !== "all",
+    filterGenre !== "all",
+    filterRatings.length > 0,
+  ].filter(Boolean).length;
+
+  const filtered = React.useMemo(() => {
+    return (movies ?? []).filter((item) => {
+      if (filterStatus !== "all" && item.status !== filterStatus) return false;
+      if (filterGenre !== "all" && !item.movies?.genres?.includes(filterGenre)) return false;
+      if (filterRatings.length > 0) {
+        const rating = item.user_reviews?.rating ?? 0;
+        if (!filterRatings.includes(rating)) return false;
+      }
+      return true;
+    });
+  }, [movies, filterStatus, filterGenre, filterRatings]);
+
+  const sorted = React.useMemo(() => {
+    const copy = [...filtered];
+    const key = sortKey;
+    const dir = sortDir;
+    copy.sort((a, b) => {
+      let av: string | number | null = null;
+      let bv: string | number | null = null;
+      if (key === "title") {
+        const cmp = (a.movies?.title ?? "").localeCompare(b.movies?.title ?? "", "ja");
+        return dir === "asc" ? cmp : -cmp;
+      }
+      if (key === "year")       { av = a.movies?.year ?? 0; bv = b.movies?.year ?? 0; }
+      if (key === "rating")     { av = a.user_reviews?.rating ?? -1; bv = b.user_reviews?.rating ?? -1; }
+      if (key === "created_at") { av = new Date(a.created_at ?? 0).getTime(); bv = new Date(b.created_at ?? 0).getTime(); }
+      if (key === "watched_at") { av = new Date(a.watched_at ?? 0).getTime(); bv = new Date(b.watched_at ?? 0).getTime(); }
+      const diff = (av as number) - (bv as number);
+      return dir === "asc" ? diff : -diff;
+    });
+    return copy;
+  }, [filtered, sortKey, sortDir]);
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await deleteMovie(deleteTarget.id);
+      setDeleteTarget(null);
+      setSelectedId(null);
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  if (!movies?.length) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+        <div className="text-5xl opacity-30">🎬</div>
+        <p className="text-zinc-400 text-sm">まだ登録された映画がありません</p>
+      </div>
+    );
+  }
+
+  const selectedItem = sorted.find((i) => i.id === selectedId);
+
+  return (
+    <>
+      {deleteTarget && (
+        <DeleteConfirmDialog
+          title={deleteTarget.movies?.title ?? ""}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          isPending={isDeleting}
+        />
+      )}
+
+      <div className="flex flex-col gap-3">
+        {/* ツールバー */}
+        <div className="flex items-center gap-2">
+          <SortKeyDropdown value={sortKey} onChange={setSortKey} />
+          <SortDirToggle value={sortDir} onChange={setSortDir} />
+
+          <button
+            onClick={() => setShowFilter((v) => !v)}
+            className={`flex items-center gap-1.5 border text-xs rounded-lg px-2.5 py-1.5 transition-colors ${
+              showFilter || activeFilterCount > 0
+                ? "bg-amber-900/40 border-amber-700/60 text-amber-300"
+                : "bg-zinc-900 border-amber-900/40 text-amber-300/80 hover:border-amber-700"
+            }`}
+          >
+            <SlidersHorizontal size={13} />
+            {activeFilterCount > 0 && (
+              <span className="bg-amber-500 text-black text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          <div className="flex gap-2 ml-auto">
+            {selectedId ? (
+              <Link href={`/main/registration?editId=${selectedId}`}>
+                <button className="bg-amber-800 hover:bg-amber-700 text-amber-100 text-xs font-semibold rounded-lg px-4 py-1.5 transition-colors">
+                  編集
+                </button>
+              </Link>
+            ) : (
+              <button disabled className="bg-zinc-800 text-zinc-600 text-xs font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
+                編集
+              </button>
+            )}
+
+            {selectedId && selectedItem ? (
+              <button
+                onClick={() => setDeleteTarget(selectedItem)}
+                className="bg-red-950 hover:bg-red-900 border border-red-900/60 text-red-400 text-xs font-semibold rounded-lg px-4 py-1.5 transition-colors"
+              >
+                削除
+              </button>
+            ) : (
+              <button disabled className="bg-zinc-800 text-zinc-600 text-xs font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
+                削除
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 絞り込みパネル */}
+        {showFilter && (
+          <FilterPanel
+            movies={movies}
+            filterStatus={filterStatus}
+            filterGenre={filterGenre}
+            filterRatings={filterRatings}
+            onStatusChange={setFilterStatus}
+            onGenreChange={setFilterGenre}
+            onRatingsChange={setFilterRatings}
+          />
+        )}
+
+        {/* 件数表示 */}
+        {activeFilterCount > 0 && (
+          <p className="text-zinc-500 text-xs">
+            {sorted.length} / {movies.length} 件
+            <button
+              onClick={() => { setFilterStatus("all"); setFilterGenre("all"); setFilterRatings([]); }}
+              className="ml-2 text-amber-800/70 hover:text-amber-600 transition-colors"
+            >
+              絞り込みをクリア
+            </button>
+          </p>
+        )}
+
+        {/* カードグリッド */}
+        {sorted.length === 0 ? (
+          <div className="flex flex-col items-center py-12 gap-2 text-center">
+            <p className="text-zinc-500 text-sm">条件に一致する映画がありません</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {sorted.map((item) => {
+              const movie = item.movies;
+              const selected = selectedId === item.id;
+              const genre = movie?.genres?.[0] ?? null;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setSelectedId(item.id === selectedId ? null : item.id)}
+                  className={`flex flex-col rounded-xl overflow-hidden border transition-all text-left ${
+                    selected
+                      ? "border-amber-500 shadow-lg shadow-amber-900/30 scale-[1.02]"
+                      : "border-amber-900/20 hover:border-amber-800/40"
+                  }`}
+                >
+                  <div className="relative aspect-[2/3] w-full bg-zinc-900">
+                    {movie?.poster_path ? (
+                      <img
+                        src={`${TMDB_IMG}${movie.poster_path}`}
+                        alt={movie?.title ?? ""}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-zinc-700 text-xs">
+                        No Image
+                      </div>
+                    )}
+                    {item.status && (
+                      <span className={`absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded ${
+                        item.status === "watched"
+                          ? "bg-amber-900/90 text-amber-300"
+                          : "bg-zinc-800/90 text-zinc-300"
+                      }`}>
+                        {STATUS_LABELS[item.status] ?? item.status}
+                      </span>
+                    )}
+                    {selected && (
+                      <div className="absolute inset-0 ring-2 ring-amber-500 rounded-xl pointer-events-none" />
+                    )}
+                  </div>
+
+                  <div className="bg-zinc-950/90 px-2 py-1.5 flex flex-col gap-0.5 flex-1">
+                    <p className="text-zinc-200 text-[11px] font-medium leading-tight line-clamp-2">
+                      {movie?.title ?? ""}
+                    </p>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="text-zinc-600 text-[10px] shrink-0">{movie?.year ?? ""}</p>
+                      {genre && <p className="text-zinc-600 text-[10px] truncate text-right">{genre}</p>}
+                    </div>
+                    <RatingStars rating={item.user_reviews?.rating} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 選択中の詳細 */}
+        {selectedId && selectedItem && (
+          <div className="bg-zinc-900/80 border border-amber-900/30 rounded-xl p-4 flex flex-col gap-2">
+            <h3 className="text-amber-300 font-semibold text-sm">{selectedItem.movies?.title}</h3>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
+              {selectedItem.movies?.year && <span>{selectedItem.movies.year}年</span>}
+              {selectedItem.movies?.genres?.length && <span>{selectedItem.movies.genres.join(", ")}</span>}
+              {selectedItem.watched_at && <span>視聴日: {jpDate(selectedItem.watched_at)}</span>}
+            </div>
+            {selectedItem.memo && (
+              <p className="text-zinc-400 text-xs leading-relaxed border-t border-zinc-800 pt-2 mt-1">
+                {selectedItem.memo}
+              </p>
+            )}
+            {selectedItem.movies?.tmdb_id && (
+              <a
+                href={`https://www.themoviedb.org/movie/${selectedItem.movies.tmdb_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
+                onClick={(e) => e.stopPropagation()}
+              >
+                TMDBで見る
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

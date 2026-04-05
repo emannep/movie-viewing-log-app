@@ -67,15 +67,20 @@ export async function getRecommendations(limit = 12): Promise<RecommendedMovie[]
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) return [];
 
+  // 週番号（エポックからの週数）でページをローテーション（1〜5ページ）
+  const weekNumber = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  const page = (weekNumber % 5) + 1;
+
   const url = new URL("https://api.themoviedb.org/3/discover/movie");
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("with_genres", tmdbGenreIds.join("|"));
   url.searchParams.set("sort_by", "vote_average.desc");
   url.searchParams.set("vote_count.gte", "500");
   url.searchParams.set("language", "ja-JP");
-  url.searchParams.set("page", "1");
+  url.searchParams.set("page", String(page));
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  // キャッシュを1週間に設定
+  const res = await fetch(url.toString(), { next: { revalidate: 7 * 24 * 60 * 60 } });
   if (!res.ok) return [];
 
   const data = await res.json();
