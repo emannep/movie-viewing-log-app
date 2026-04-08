@@ -21,7 +21,7 @@ export default function loginPage() {
         <div className="flex flex-col items-center">
           <div className="border border-amber-800/50 rounded-sm px-8 py-3 bg-amber-950/20 text-center">
             <p className="text-amber-700/70 text-[10px] tracking-[0.35em] uppercase mb-1">Film Museum</p>
-            <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">みたろぐ</h1>
+            <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
           </div>
           <p className="mt-3 text-xs text-zinc-600 tracking-widest uppercase">入館手続き</p>
         </div>

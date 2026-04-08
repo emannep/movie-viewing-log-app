@@ -13,7 +13,7 @@ export default function RootPage() {
             Movies Viewing Log
           </p>
           <h1 className="flex justify-center items-center text-center mt-2 text-2xl font-semibold text-orange-300 tracking-tight">
-            「みたろぐ」へようこそ
+            「あなたの映画博物館」へようこそ
           </h1>
           <p className="mt-3 text-sm text-slate-300 leading-relaxed">
             観た映画の評価や感想を記録し、あなた好みの作品をレコメンドするためのアプリです。
