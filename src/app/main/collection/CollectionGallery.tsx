@@ -169,9 +169,14 @@ export default function CollectionGallery({
     }
     const storedHome = localStorage.getItem(HOME_STORAGE_KEY);
     if (storedHome) {
-      try { setHomeKeys(new Set(JSON.parse(storedHome))); } catch {}
+      try {
+        const parsed: string[] = JSON.parse(storedHome);
+        const validKeys = collections.map((c) => `${c.genre}-${c.decade}`);
+        const valid = parsed.filter((k) => validKeys.includes(k)).slice(0, 2);
+        setHomeKeys(new Set(valid));
+      } catch {}
     }
-  }, []);
+  }, [collections]);
 
   function toggleKey(key: string) {
     setSelectedKeys((prev) => {

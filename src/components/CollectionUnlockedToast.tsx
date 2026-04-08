@@ -9,8 +9,9 @@ export default function CollectionUnlockedToast() {
   const router = useRouter();
   const [items, setItems] = useState<string[]>([]);
 
+  const raw = searchParams.get("unlocked");
+
   useEffect(() => {
-    const raw = searchParams.get("unlocked");
     if (!raw) return;
 
     const decoded = decodeURIComponent(raw)
@@ -22,18 +23,23 @@ export default function CollectionUnlockedToast() {
     setItems(decoded);
 
     // URLからパラメータを消す（履歴を汚さない）
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     params.delete("unlocked");
     const newUrl = params.toString() ? `?${params}` : window.location.pathname;
     router.replace(newUrl);
-  }, []);
+  }, [raw, router]);
 
   if (items.length === 0) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm animate-in slide-in-from-top-2 duration-300">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm animate-in slide-in-from-top-2 duration-300"
+    >
       <div className="bg-amber-950/95 border border-amber-700/60 rounded-xl p-4 shadow-xl shadow-black/50 backdrop-blur-sm">
         <button
+          aria-label="通知を閉じる"
           className="absolute top-3 right-3 text-amber-700 hover:text-amber-400 transition-colors"
           onClick={() => setItems([])}
         >

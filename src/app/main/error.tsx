@@ -10,10 +10,17 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // ChunkLoadError はリロードで確実に解消できる
-    if (error.name === "ChunkLoadError" || error.message.includes("Loading chunk")) {
-      window.location.reload();
-    }
+    const isChunkLoadError =
+      error.name === "ChunkLoadError" ||
+      error.message.includes("Loading chunk");
+
+    if (!isChunkLoadError) return;
+
+    const reloadKey = `chunk-reload:${window.location.pathname}`;
+    if (sessionStorage.getItem(reloadKey)) return;
+
+    sessionStorage.setItem(reloadKey, "1");
+    window.location.reload();
   }, [error]);
 
   return (

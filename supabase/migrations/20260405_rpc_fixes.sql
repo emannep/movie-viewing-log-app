@@ -9,15 +9,22 @@ CREATE OR REPLACE FUNCTION increment_user_points(
   p_points   integer
 )
 RETURNS void
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
+BEGIN
+  IF auth.uid() != p_user_id THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+
   INSERT INTO user_points (user_id, total_points, updated_at)
   VALUES (p_user_id, p_points, now())
   ON CONFLICT (user_id)
   DO UPDATE SET
     total_points = user_points.total_points + EXCLUDED.total_points,
     updated_at   = now();
+END;
 $$;
 
 -- 2. delete_movie_if_orphaned: 孤立映画のアトミック削除
@@ -26,14 +33,21 @@ CREATE OR REPLACE FUNCTION delete_movie_if_orphaned(
   p_movie_id uuid
 )
 RETURNS void
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
   DELETE FROM movies
   WHERE id = p_movie_id
     AND NOT EXISTS (
       SELECT 1 FROM user_movies WHERE movie_id = p_movie_id
     );
+END;
 $$;
 
 -- 3. 20260404_cumulative_points.sql の移行を安全にする

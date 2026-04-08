@@ -104,14 +104,18 @@ export default function HomeCollectionSection({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const validKeys = new Set(
+      collections.map((c) => `${c.genre}-${c.decade}`)
+    );
     const stored = localStorage.getItem(HOME_STORAGE_KEY);
     if (stored) {
       try {
-        setHomeKeys(new Set(JSON.parse(stored)));
+        const parsed: string[] = JSON.parse(stored);
+        setHomeKeys(new Set(parsed.filter((key) => validKeys.has(key)).slice(0, 2)));
       } catch {}
     }
     setMounted(true);
-  }, []);
+  }, [collections]);
 
   let featured: (Collection | null)[];
 
