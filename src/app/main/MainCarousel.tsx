@@ -67,10 +67,10 @@ export default function MainCarousel({
   watchlist: WatchlistMovie[];
 }) {
   return (
-    <div className="flex flex-col gap-6 w-full pb-6">
+    <div className="flex flex-col gap-3 w-full pb-4">
       {/* おすすめ映画 */}
       <section>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
           <div className="flex items-center gap-2">
             <h2 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">おすすめ映画</h2>
@@ -81,14 +81,14 @@ export default function MainCarousel({
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
         </div>
         {recommendations.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-4">
+          <p className="text-xs text-zinc-500 text-center py-2">
             視聴済み映画を★4以上で登録するとおすすめが表示されます
           </p>
         ) : (
           <Carousel
             plugins={[Autoplay({ delay: 3000 })]}
             opts={{ align: "start", loop: true }}
-            className="w-full"
+            className="w-full px-10"
           >
             <CarouselContent>
               {recommendations.map((movie) => (
@@ -101,25 +101,25 @@ export default function MainCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
           </Carousel>
         )}
       </section>
 
       {/* 観たいリスト */}
       <section>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
           <h2 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">観たいリスト</h2>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
         </div>
         {watchlist.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-4">
+          <p className="text-xs text-zinc-500 text-center py-2">
             「視たい」ステータスで映画を登録しよう！
           </p>
         ) : (
-          <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <Carousel opts={{ align: "start", loop: true }} className="w-full px-10">
             <CarouselContent>
               {watchlist.map((row) => (
                 <CarouselItem key={row.id} className="basis-1/3">
@@ -131,8 +131,8 @@ export default function MainCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
           </Carousel>
         )}
       </section>

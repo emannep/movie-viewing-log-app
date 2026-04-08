@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 }
 
 export const metadata = {
-  title: 'みたろぐ | 観た映画の評価や感想を記録・レコメンドしておすすめを表示',
+  title: 'あなたの映画博物館 | 観た映画の評価や感想を記録・レコメンドしておすすめを表示',
   description: '観た映画の評価や感想を記録し、レコメンドしておすすめを表示できる映画評価アプリ。',
   keywords: ['映画', '鑑賞ログ', '映画記録', '評価', 'レビュー', 'レコメンド', 'おすすめ表示'],
   authors: [{ name: 'emannep' }],

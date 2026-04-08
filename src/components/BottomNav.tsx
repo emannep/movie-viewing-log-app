@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Home, Plus, LayoutList, Landmark, User } from "lucide-react";
 
 const NAV = [
@@ -14,6 +14,7 @@ const NAV = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0c0907]/95 border-t border-amber-900/40 backdrop-blur-sm">
@@ -23,27 +24,37 @@ export default function BottomNav() {
             href === "/main"
               ? pathname === "/main"
               : pathname.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-colors ${
-                active
-                  ? "text-amber-400"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.2 : 1.5}
-              />
-              <span
-                className={`text-[10px] font-medium tracking-wide ${
-                  active ? "text-amber-400" : "text-zinc-500"
-                }`}
-              >
+          const itemClass = `flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-colors ${
+            active ? "text-amber-400" : "text-zinc-500 hover:text-zinc-300"
+          }`;
+          const inner = (
+            <>
+              <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
+              <span className={`text-[10px] font-medium tracking-wide ${active ? "text-amber-400" : "text-zinc-500"}`}>
                 {label}
               </span>
+            </>
+          );
+
+          // ホーム・展示室は router.refresh() を挟んで Router Cache をバイパス
+          if (href === "/main" || href === "/main/collection") {
+            return (
+              <button
+                key={href}
+                className={itemClass}
+                onClick={() => {
+                  router.push(href);
+                  router.refresh();
+                }}
+              >
+                {inner}
+              </button>
+            );
+          }
+
+          return (
+            <Link key={href} href={href} className={itemClass}>
+              {inner}
             </Link>
           );
         })}

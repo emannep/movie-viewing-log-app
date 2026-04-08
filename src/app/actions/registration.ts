@@ -74,9 +74,11 @@ export async function registerMovie(formData: FormData) {
 
   const created_at = createdAtStr ? new Date(createdAtStr).toISOString() : null;
 
+  let newlyUnlocked: { genre: string; decade: number }[] = [];
+
   try {
-  
-    // ※将来 tmdb_id を使う、そっちをキーにする 
+
+    // ※将来 tmdb_id を使う、そっちをキーにする
     const { data, error } = await supabase.rpc("register_movie_data", {
       _title: title,
       _year: year,
@@ -100,17 +102,23 @@ export async function registerMovie(formData: FormData) {
     if (status === "watched" && genresArray.length > 0) {
       const unlockedGenres = await getUnlockedGenres(userId);
       const isCollectionMovie = genresArray.some((g) => unlockedGenres.has(g));
-      await Promise.all([
+      [, newlyUnlocked] = await Promise.all([
         awardPoints(userId, isCollectionMovie),
         checkAndUnlockCollections(userId, genresArray),
       ]);
     }
 
+    revalidatePath("/main");
     revalidatePath("/main/movies");
     revalidatePath("/main/collection");
   } catch (e) {
     console.error("movies クエリ実行エラー:", e);
     throw e;
+  }
+
+  if (newlyUnlocked.length > 0) {
+    const param = newlyUnlocked.map((c) => `${c.genre}-${c.decade}`).join(",");
+    redirect(`/main/movies?unlocked=${encodeURIComponent(param)}`);
   }
   redirect("/main/movies");
 }
