@@ -184,7 +184,7 @@ export default function CollectionGallery({
   const completedKeys = completedCollections.map((c) => `${c.genre}-${c.decade}`);
 
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
-    new Set([...activeKeys.slice(0, 5), ...completedKeys])
+    new Set([...activeKeys, ...completedKeys].slice(0, 5))
   );
   const [homeKeys, setHomeKeys] = useState<Set<string>>(new Set());
   const [showPicker, setShowPicker] = useState(false);
@@ -198,7 +198,7 @@ export default function CollectionGallery({
       try {
         const parsed: string[] = JSON.parse(storedSelected);
         const allKeys = [...activeKeys, ...completedKeys];
-        const valid = parsed.filter((k) => allKeys.includes(k));
+        const valid = parsed.filter((k) => allKeys.includes(k)).slice(0, 5);
         if (valid.length > 0) setSelectedKeys(new Set(valid));
       } catch {}
     }
@@ -367,7 +367,7 @@ export default function CollectionGallery({
 
       {/* コンプリート済みコレクション ボトムシート */}
       {showCompletedSheet && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col justify-end">
+        <div className="fixed inset-0 z-40 flex flex-col justify-end pb-16">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setShowCompletedSheet(false)}
@@ -407,7 +407,7 @@ export default function CollectionGallery({
 
       {/* コレクション選択ボトムシート */}
       {showPicker && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col justify-end">
+        <div className="fixed inset-0 z-40 flex flex-col justify-end pb-16">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setShowPicker(false)}
