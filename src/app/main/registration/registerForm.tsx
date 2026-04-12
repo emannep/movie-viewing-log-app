@@ -20,6 +20,7 @@ import {
 import { format, isValid, parseISO } from "date-fns"
 import { FaRegCalendarAlt } from "react-icons/fa"
 import { registerMovie, updateMovie } from "@/app/actions/registration"
+import { useActionState } from "react"
 import { ChevronLeft, X } from "lucide-react"
 import { ja } from "date-fns/locale"
 
@@ -151,7 +152,12 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
 
   const today = toDateValue(new Date());
   const isEdit = !!initialData;
-  const actionFn = isEdit ? updateMovie : registerMovie;
+
+  const [registerState, registerAction, registerPending] = useActionState(registerMovie, null);
+  const [updateState, updateAction, updatePending] = useActionState(updateMovie, null);
+  const formAction = isEdit ? updateAction : registerAction;
+  const state = isEdit ? updateState : registerState;
+  const isPending = isEdit ? updatePending : registerPending;
 
   const defaultStatus = initialData?.status ?? "wishlist";
   const defaultRating = initialData?.user_reviews?.rating ?? "";
@@ -170,6 +176,15 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
   const [status, setStatus] = React.useState(defaultStatus);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
+  const [accordionValue, setAccordionValue] = React.useState<string | undefined>(
+    isEdit ? "movie-details" : undefined
+  );
+
+  React.useEffect(() => {
+    if (state?.error && (state.error.includes("年") || state.error.includes("ジャンル"))) {
+      setAccordionValue("movie-details");
+    }
+  }, [state?.error]);
 
   const handleSearch = async () => {
     if (!title) { alert("タイトルを入力してください。"); return; }
@@ -232,7 +247,12 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
         <div className="w-16" />
       </header>
 
-      <form action={actionFn} className="flex flex-col gap-3">
+      <form action={formAction} className="flex flex-col gap-3">
+        {state?.error && (
+          <p className="rounded-lg border border-red-800/60 bg-red-950/40 px-3 py-2 text-sm text-red-400">
+            {state.error}
+          </p>
+        )}
         {isEdit && <input type="hidden" name="id" value={initialData.id} />}
         {isEdit && <input type="hidden" name="movie_id" value={initialData.movies.id} />}
         <input type="hidden" name="tmdb_id" value={tmdbId} />
@@ -307,7 +327,7 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
         </div>
 
         {/* 映画詳細（折りたたみ） */}
-        <Accordion type="single" collapsible defaultValue={isEdit ? "movie-details" : undefined} className="bg-zinc-900/60 border border-amber-900/20 rounded-xl flex flex-col">
+        <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="bg-zinc-900/60 border border-amber-900/20 rounded-xl flex flex-col">
           <AccordionItem value="movie-details" className="border-none">
             <AccordionTrigger className="px-3 py-3 text-xs text-amber-700/80 tracking-widest uppercase hover:no-underline hover:text-amber-500/80 transition-colors [&>svg]:text-amber-700/60">
               映画詳細（年代とジャンルを手動入力）
@@ -321,7 +341,6 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
                   min="1888"
                   max={maxYear}
                   className={fieldClass}
-                  required
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                 />
@@ -329,7 +348,7 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
 
               <div>
                 <label className={labelClass}>ジャンル</label>
-                <Select name="genres" required value={genre} onValueChange={setGenre}>
+                <Select name="genres" value={genre} onValueChange={setGenre}>
                   <SelectTrigger>
                     <SelectValue placeholder="ジャンルを選択" />
                   </SelectTrigger>
@@ -397,9 +416,10 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
 
         <button
           type="submit"
-          className="w-full py-3 rounded-xl bg-amber-800 hover:bg-amber-700 text-amber-100 font-semibold text-sm tracking-wide transition-colors shadow-lg shadow-amber-950/30"
+          disabled={isPending}
+          className="w-full py-3 rounded-xl bg-amber-800 hover:bg-amber-700 disabled:opacity-50 text-amber-100 font-semibold text-sm tracking-wide transition-colors shadow-lg shadow-amber-950/30"
         >
-          {isEdit ? "更新する" : "登録する"}
+          {isPending ? "送信中..." : isEdit ? "更新する" : "登録する"}
         </button>
       </form>
     </div>
