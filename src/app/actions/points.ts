@@ -2,13 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  getSeasonKey,
-  getSeasonLabel,
   getSeasonRange,
   calcLevel,
-  calcCrownRank,
+  calcTitle,
+  calcCrownRankByPercentile,
   nextThreshold,
-  LEVEL_TITLES,
   SEASON_THRESHOLDS,
   ANNUAL_THRESHOLDS,
   CROWN_LABELS,
@@ -58,6 +56,7 @@ export type CrownInfo = {
   color: string;
   count: number;
   nextThreshold: number | null;
+  percentile: number | null; // 0〜1（1が上位）、null=データ不足
 };
 
 export type ProfileData = {
@@ -92,24 +91,55 @@ export async function getProfileData(): Promise<ProfileData | null> {
 
   const totalPoints = pointsRow?.total_points ?? 0;
   const level = calcLevel(totalPoints);
-  const title = LEVEL_TITLES[level];
+  const title = calcTitle(level);
 
   const movies = watchedRows ?? [];
-
-  // シーズン王冠
   const { start, end } = getSeasonRange(now);
+  const currentYear = now.getFullYear();
+
+  // 自分の視聴数
   const seasonCount = movies.filter((m) => {
     const d = new Date(m.watched_at!);
     return d >= start && d <= end;
   }).length;
-  const seasonRank = calcCrownRank(seasonCount, "season");
-
-  // 年間王冠
-  const currentYear = now.getFullYear();
   const annualCount = movies.filter(
     (m) => new Date(m.watched_at!).getFullYear() === currentYear
   ).length;
-  const annualRank = calcCrownRank(annualCount, "annual");
+
+  // 他ユーザーの視聴数（パーセンタイル計算用）
+  const [{ data: allSeasonRows }, { data: allAnnualRows }] = await Promise.all([
+    supabase
+      .from("user_movies")
+      .select("user_id")
+      .eq("status", "watched")
+      .not("watched_at", "is", null)
+      .gte("watched_at", start.toISOString())
+      .lt("watched_at", end.toISOString()),
+    supabase
+      .from("user_movies")
+      .select("user_id")
+      .eq("status", "watched")
+      .not("watched_at", "is", null)
+      .gte("watched_at", `${currentYear}-01-01`)
+      .lt("watched_at", `${currentYear + 1}-01-01`),
+  ]);
+
+  function countsByUser(rows: { user_id: string }[] | null): number[] {
+    if (!rows) return [];
+    const map: Record<string, number> = {};
+    for (const r of rows) {
+      map[r.user_id] = (map[r.user_id] ?? 0) + 1;
+    }
+    return Object.values(map);
+  }
+
+  const allSeasonCounts = countsByUser(allSeasonRows);
+  const allAnnualCounts = countsByUser(allAnnualRows);
+
+  const { rank: seasonRank, percentile: seasonPercentile } =
+    calcCrownRankByPercentile(seasonCount, allSeasonCounts, "season");
+  const { rank: annualRank, percentile: annualPercentile } =
+    calcCrownRankByPercentile(annualCount, allAnnualCounts, "annual");
 
   return {
     totalPoints,
@@ -121,6 +151,7 @@ export async function getProfileData(): Promise<ProfileData | null> {
       color: CROWN_COLORS[seasonRank],
       count: seasonCount,
       nextThreshold: nextThreshold(seasonCount, SEASON_THRESHOLDS),
+      percentile: seasonPercentile,
     },
     annualCrown: {
       rank: annualRank,
@@ -128,6 +159,7 @@ export async function getProfileData(): Promise<ProfileData | null> {
       color: CROWN_COLORS[annualRank],
       count: annualCount,
       nextThreshold: nextThreshold(annualCount, ANNUAL_THRESHOLDS),
+      percentile: annualPercentile,
     },
   };
 }

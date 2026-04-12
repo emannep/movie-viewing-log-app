@@ -12,6 +12,7 @@ function CrownBadge({
   color,
   count,
   nextThreshold,
+  percentile,
   type,
 }: {
   rank: string;
@@ -19,10 +20,16 @@ function CrownBadge({
   color: string;
   count: number;
   nextThreshold: number | null;
+  percentile: number | null;
   type: "season" | "annual";
 }) {
   const typeLabel = type === "season" ? "シーズン" : "年間";
   const crownColors = CROWN_ICON_COLORS[rank as keyof typeof CROWN_ICON_COLORS];
+  // percentile=0（比較対象なし or 最下位）のときは非表示
+  const topPercent =
+    percentile !== null && percentile > 0
+      ? Math.round((1 - percentile) * 100)
+      : null;
 
   return (
     <div className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-4 flex flex-col gap-2">
@@ -36,6 +43,9 @@ function CrownBadge({
             strokeWidth={1.5}
           />
           <span className={`font-bold text-lg ${color}`}>{label}</span>
+          {topPercent !== null && (
+            <span className="text-zinc-500 text-xs ml-1">上位 {topPercent}%</span>
+          )}
         </div>
       ) : (
         <p className="text-zinc-600 text-sm">まだ獲得していません</p>
@@ -127,11 +137,11 @@ export default async function ProfilePage() {
               <div className="w-full bg-zinc-800 rounded-full h-1.5">
                 <div
                   className="bg-amber-500 h-1.5 rounded-full transition-all"
-                  style={{ width: `${Math.min((totalPoints % 5) / 5 * 100, 100)}%` }}
+                  style={{ width: `${Math.min((totalPoints % 10) / 10 * 100, 100)}%` }}
                 />
               </div>
               <p className="text-zinc-600 text-xs mt-1.5">
-                次のレベルまで {5 - (totalPoints % 5)} pt
+                次のレベルまで {10 - (totalPoints % 10)} pt
                 <span className="ml-2">（コレクション映画: 2pt / その他: 1pt）</span>
               </p>
             </div>

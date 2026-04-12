@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,7 +31,11 @@ export async function updateEmail(formData: FormData) {
   if (!email) return { error: "メールアドレスを入力してください" };
   if (email === user.email) return { error: "現在と同じメールアドレスです" };
 
-  const { error } = await supabase.auth.updateUser({ email });
+  const headersList = await headers();
+  const origin = headersList.get("origin") ?? headersList.get("x-forwarded-host") ?? "http://localhost:3000";
+  const emailRedirectTo = `${origin}/auth/callback?next=/main/settings`;
+
+  const { error } = await supabase.auth.updateUser({ email }, { emailRedirectTo });
   if (error) return { error: error.message };
   return { success: true, message: "確認メールを送信しました。新しいアドレスで確認してください。" };
 }

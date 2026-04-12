@@ -7,7 +7,9 @@ import { revalidatePath } from "next/cache";
 import { checkAndUnlockCollections, getUnlockedGenres } from "./collections";
 import { awardPoints } from "./points";
 
-export async function registerMovie(formData: FormData) {
+export type FormState = { error: string } | null;
+
+export async function registerMovie(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient();
 
   const { data: userRes, error: userErr } = await supabase.auth.getUser();
@@ -31,22 +33,14 @@ export async function registerMovie(formData: FormData) {
   const poster_path = posterPathStr || null;
   const tmdb_vote_average = tmdbVoteAverageRaw ? Number(tmdbVoteAverageRaw) : null;
 
-  if (!title) {
-    throw new Error("タイトルは必須です");
-  }
-  
-  if (!yearRaw) {
-    throw new Error("年は必須です");
-  }
+  if (!title) return { error: "タイトルは必須です" };
+  if (!yearRaw) return { error: "年は必須です" };
+
   const year = Number(yearRaw);
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  if (isNaN(year)) {
-    throw new Error("年は数値で入力してください");
-  }
-  if (year < 1888 || year > maxYear) {
-    throw new Error(`年は 1888〜${maxYear} の間で入力してください`);
-  }
+  if (isNaN(year)) return { error: "年は数値で入力してください" };
+  if (year < 1888 || year > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
 
   const genresArray =
     genresRaw === ""
@@ -57,17 +51,15 @@ export async function registerMovie(formData: FormData) {
           .filter((g) => g.length > 0);
 
   let rating: number | null = null;
-  if (status !== "wishlist" ) {
+  if (status !== "wishlist") {
     if (ratingRaw !== null) {
       const parsedRating = Number(ratingRaw);
       if (!Number.isNaN(parsedRating)) {
-        if (parsedRating < 1 || parsedRating > 5) {
-          throw new Error("評価は 1〜5 の間で入力してください");
-        }
-      rating = parsedRating;
+        if (parsedRating < 1 || parsedRating > 5) return { error: "評価は 1〜5 の間で入力してください" };
+        rating = parsedRating;
       }
     }
-  }  
+  }
 
   const watched_at =
     status === "watched" && watchedAtStr ? new Date(watchedAtStr).toISOString() : null;
@@ -77,8 +69,6 @@ export async function registerMovie(formData: FormData) {
   let newlyUnlocked: { genre: string; decade: number }[] = [];
 
   try {
-
-    // ※将来 tmdb_id を使う、そっちをキーにする
     const { data, error } = await supabase.rpc("register_movie_data", {
       _title: title,
       _year: year,
@@ -95,7 +85,7 @@ export async function registerMovie(formData: FormData) {
 
     if (error) {
       console.error("movies 取得エラー:", error);
-      throw new Error(error.message);
+      return { error: error.message };
     }
 
     // 視聴済み登録のみポイント付与 & コレクション解放チェック
@@ -113,7 +103,7 @@ export async function registerMovie(formData: FormData) {
     revalidatePath("/main/collection");
   } catch (e) {
     console.error("movies クエリ実行エラー:", e);
-    throw e;
+    return { error: "登録中にエラーが発生しました" };
   }
 
   if (newlyUnlocked.length > 0) {
@@ -157,7 +147,7 @@ export async function deleteMovie(id: string) {
   revalidatePath("/main/collection");
 }
 
-export async function updateMovie(formData: FormData) {
+export async function updateMovie(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient();
 
   const { data: userRes, error: userErr } = await supabase.auth.getUser();
@@ -184,26 +174,26 @@ export async function updateMovie(formData: FormData) {
   const poster_path = posterPathStr || null;
   const tmdb_vote_average = tmdbVoteAverageRaw ? Number(tmdbVoteAverageRaw) : null;
 
-  if (!title) throw new Error("タイトルは必須です");
-  if (!yearRaw) throw new Error("年は必須です");
-  
+  if (!title) return { error: "タイトルは必須です" };
+  if (!yearRaw) return { error: "年は必須です" };
+
   const year = Number(yearRaw);
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  if (isNaN(year)) throw new Error("年は数値で入力してください");
-  if (year < 1888 || year > maxYear) throw new Error(`年は 1888〜${maxYear} の間で入力してください`);
+  if (isNaN(year)) return { error: "年は数値で入力してください" };
+  if (year < 1888 || year > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
 
   const genresArray = genresRaw === "" ? [] : genresRaw.split(/[、,]/).map((g) => g.trim()).filter((g) => g.length > 0);
 
   let rating: number | null = null;
-  if (status !== "wishlist" ) {
+  if (status !== "wishlist") {
     if (ratingRaw !== null && ratingRaw !== "") {
       const parsedRating = Number(ratingRaw);
       if (!Number.isNaN(parsedRating) && parsedRating >= 1 && parsedRating <= 5) {
         rating = parsedRating;
       }
     }
-  }  
+  }
 
   const watched_at = status === "watched" && watchedAtStr ? new Date(watchedAtStr).toISOString() : null;
   const created_at = createdAtStr ? new Date(createdAtStr).toISOString() : null;
@@ -211,36 +201,40 @@ export async function updateMovie(formData: FormData) {
   try {
     const { error: moviesErr } = await supabase
       .from("movies")
-      .update({ 
-        title, 
-        year, 
+      .update({
+        title,
+        year,
         genres: genresArray,
         tmdb_id,
         poster_path,
         tmdb_vote_average
       })
       .eq("id", movie_id);
-    if (moviesErr) throw new Error(moviesErr.message);
+    if (moviesErr) return { error: moviesErr.message };
 
     const { error: userMoviesErr } = await supabase
       .from("user_movies")
       .update({ status, memo: memo || null, watched_at, created_at })
       .eq("id", id);
-    if (userMoviesErr) throw new Error(userMoviesErr.message);
+    if (userMoviesErr) return { error: userMoviesErr.message };
 
     if (rating !== null) {
       const { error: reviewErr } = await supabase
         .from("user_reviews")
-        .upsert({ user_id: userId, movie_id: movie_id, rating }, { onConflict: "user_id,movie_id" });
-      if (reviewErr) throw new Error(reviewErr.message);
+        .upsert({ user_movie_id: id, rating }, { onConflict: "user_movie_id" });
+      if (reviewErr) return { error: reviewErr.message };
     } else {
-      await supabase.from("user_reviews").delete().eq("user_id", userId).eq("movie_id", movie_id);
+      const { error: reviewDeleteErr } = await supabase
+        .from("user_reviews")
+        .delete()
+        .eq("user_movie_id", id);
+      if (reviewDeleteErr) return { error: reviewDeleteErr.message };
     }
 
     revalidatePath("/main/movies");
   } catch (e) {
     console.error("movies 更新エラー:", e);
-    throw e;
+    return { error: "更新中にエラーが発生しました" };
   }
   redirect("/main/movies");
 }

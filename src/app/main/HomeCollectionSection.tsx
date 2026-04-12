@@ -51,11 +51,11 @@ function CollectionPreview({
               />
             </div>
 
-            <div className="flex justify-center gap-x-4 w-full">
+            <div className="flex justify-center gap-x-1.5 sm:gap-x-2 w-full">
               {collection.movies.slice(0, 5).map((movie) => (
                 <div
                   key={movie.tmdb_id}
-                  className="relative shrink-0 w-[44px] h-[56px] rounded overflow-hidden border border-amber-900/30 bg-zinc-800"
+                  className="relative shrink-0 w-[48px] h-[64px] sm:w-[56px] sm:h-[72px] rounded overflow-hidden border border-amber-900/30 bg-zinc-800"
                 >
                   {movie.collected && movie.poster_path ? (
                     <img

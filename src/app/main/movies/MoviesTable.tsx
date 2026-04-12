@@ -240,11 +240,13 @@ function DeleteConfirmDialog({
   onConfirm,
   onCancel,
   isPending,
+  error,
 }: {
   title: string;
   onConfirm: () => void;
   onCancel: () => void;
   isPending: boolean;
+  error: string | null;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
@@ -256,6 +258,7 @@ function DeleteConfirmDialog({
             「<span className="text-zinc-200 font-medium">{title}</span>」を削除しますか？
           </p>
           <p className="text-zinc-600 text-xs">この操作は取り消せません。</p>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
         <div className="flex gap-3">
           <button
@@ -285,6 +288,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<UserMovieRow | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
   const [showFilter, setShowFilter] = React.useState(false);
   const [filterStatus, setFilterStatus] = React.useState("all");
   const [filterGenre, setFilterGenre] = React.useState("all");
@@ -332,6 +336,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteMovie(deleteTarget.id);
       setDeleteTarget(null);
@@ -339,6 +344,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
       router.refresh();
     } catch (e) {
       console.error(e);
+      setDeleteError("削除中にエラーが発生しました。もう一度お試しください。");
     } finally {
       setIsDeleting(false);
     }
@@ -361,8 +367,9 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
         <DeleteConfirmDialog
           title={deleteTarget.movies?.title ?? ""}
           onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => { setDeleteTarget(null); setDeleteError(null); }}
           isPending={isDeleting}
+          error={deleteError}
         />
       )}
 
@@ -506,31 +513,46 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
           </div>
         )}
 
-        {/* 選択中の詳細 */}
+        {/* 選択中の詳細（画面下部固定） */}
         {selectedId && selectedItem && (
-          <div className="bg-zinc-900/80 border border-amber-900/30 rounded-xl p-4 flex flex-col gap-2">
-            <h3 className="text-amber-300 font-semibold text-sm">{selectedItem.movies?.title}</h3>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
-              {selectedItem.movies?.year && <span>{selectedItem.movies.year}年</span>}
-              {selectedItem.movies?.genres?.length && <span>{selectedItem.movies.genres.join(", ")}</span>}
-              {selectedItem.watched_at && <span>視聴日: {jpDate(selectedItem.watched_at)}</span>}
+          <div className="fixed bottom-16 left-0 right-0 z-40 flex justify-center px-4">
+            <div className="w-full max-w-lg bg-zinc-900/95 border border-amber-900/40 rounded-xl p-4 flex flex-col gap-2 shadow-2xl shadow-black/60 backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <h3 className="[flex:21] min-w-0 break-words text-amber-300 font-semibold text-sm leading-tight">{selectedItem.movies?.title}</h3>
+                <div className="[flex:6] text-center min-w-0 break-words text-zinc-300 text-xs leading-tight pt-0.5">{STATUS_LABELS[selectedItem.status ?? ""] ?? selectedItem.status}</div>
+                <button
+                  onClick={() => setSelectedId(null)}
+                  className="[flex:1] min-w-0 text-zinc-600 hover:text-zinc-400 text-base leading-none text-center pt-0.5"
+                  aria-label="閉じる"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
+                {selectedItem.movies?.year && <span>{selectedItem.movies.year}年</span>}
+                {selectedItem.movies?.genres?.length ? (
+                  <span>{selectedItem.movies.genres.join(", ")}</span>
+                ) : null}
+                <RatingStars rating={selectedItem.user_reviews?.rating} />
+                {selectedItem.watched_at && <span>視聴日: {jpDate(selectedItem.watched_at)}</span>}
+              </div>
+              {selectedItem.memo && (
+                <p className="text-zinc-400 text-xs leading-relaxed border-t border-zinc-800 pt-2 mt-1 line-clamp-3">
+                  {selectedItem.memo}
+                </p>
+              )}
+              {selectedItem.movies?.tmdb_id && (
+                <a
+                  href={`https://www.themoviedb.org/movie/${selectedItem.movies.tmdb_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  TMDBで見る
+                </a>
+              )}
             </div>
-            {selectedItem.memo && (
-              <p className="text-zinc-400 text-xs leading-relaxed border-t border-zinc-800 pt-2 mt-1">
-                {selectedItem.memo}
-              </p>
-            )}
-            {selectedItem.movies?.tmdb_id && (
-              <a
-                href={`https://www.themoviedb.org/movie/${selectedItem.movies.tmdb_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
-                onClick={(e) => e.stopPropagation()}
-              >
-                TMDBで見る
-              </a>
-            )}
           </div>
         )}
       </div>
