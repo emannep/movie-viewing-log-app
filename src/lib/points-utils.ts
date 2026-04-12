@@ -108,7 +108,8 @@ export function calcCrownRankByPercentile(
   if (allCounts.length === 0) return { rank: absoluteRank, percentile: null };
 
   const below = allCounts.filter((v) => v < count).length;
-  const percentile = below / allCounts.length; // 0〜1（1が上位）
+  const equal = allCounts.filter((v) => v === count).length;
+  const percentile = (below + equal / 2) / allCounts.length; // 0〜1（1が上位）、同率は中間点で計算
 
   let percentileRank: CrownRank;
   if (percentile >= 0.95) percentileRank = "platinum";
