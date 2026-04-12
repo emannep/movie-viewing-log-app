@@ -45,6 +45,12 @@ export default function SettingsClient({
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarResult({ error: "ファイルサイズは2MB以下にしてください" });
+      e.target.value = "";
+      return;
+    }
+    setAvatarResult(null);
     const url = URL.createObjectURL(file);
     setAvatarPreview(url);
   }
@@ -55,11 +61,15 @@ export default function SettingsClient({
     const formData = new FormData(form);
     setAvatarResult(null);
     startAvatar(async () => {
-      const result = await uploadAvatar(formData);
-      if (result.success && result.url) {
-        setAvatarPreview(result.url);
+      try {
+        const result = await uploadAvatar(formData);
+        if (result.success && result.url) {
+          setAvatarPreview(result.url);
+        }
+        setAvatarResult(result);
+      } catch {
+        setAvatarResult({ error: "予期せぬエラーが発生しました。もう一度お試しください。" });
       }
-      setAvatarResult(result);
     });
   }
 

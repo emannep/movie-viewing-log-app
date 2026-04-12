@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, Home, SlidersHorizontal, X } from "lucide-react";
+import { Check, Home, SlidersHorizontal, Trophy, X } from "lucide-react";
 
 const HOME_STORAGE_KEY = "home_featured_collections";
 const SELECTED_KEYS_STORAGE_KEY = "collection_selected_keys";
+const SHOW_COMPLETED_KEY = "collection_show_completed";
 import type { Collection } from "@/app/actions/collections";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
@@ -15,12 +16,28 @@ const RANK_STYLES: Record<number, { bg: string; text: string }> = {
   3: { bg: "bg-amber-600",   text: "text-zinc-100" },
 };
 
-function PosterSlot({ movie }: { movie: Collection["movies"][number] }) {
+type SelectedCollectionMovie = Collection["movies"][number] & { genre: string; decade: number };
+
+function isCollectionComplete(c: Collection): boolean {
+  return c.movies.length > 0 && c.collectedCount === c.movies.length;
+}
+
+function PosterSlot({
+  movie,
+  onSelect,
+}: {
+  movie: Collection["movies"][number];
+  onSelect: () => void;
+}) {
   const rankStyle = RANK_STYLES[movie.rank] ?? { bg: "bg-zinc-700", text: "text-zinc-200" };
 
   return (
-    <div className="flex flex-col items-center gap-1.5 w-20">
-      <div className="relative w-20 h-[120px] rounded overflow-hidden border border-amber-900/40 shrink-0">
+    <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0 max-w-[80px]">
+      <button
+        className="relative w-full aspect-[2/3] rounded overflow-hidden border border-amber-900/40 shrink-0 cursor-pointer active:opacity-80"
+        onClick={onSelect}
+        aria-label={`${movie.title}の詳細を見る`}
+      >
         {movie.poster_path ? (
           <img
             src={`${TMDB_IMG}${movie.poster_path}`}
@@ -46,87 +63,51 @@ function PosterSlot({ movie }: { movie: Collection["movies"][number] }) {
             <span className="text-zinc-500 text-2xl">?</span>
           </div>
         )}
-      </div>
-      <span className={`text-[11px] w-20 text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-zinc-500"}`}>
+      </button>
+      <span className={`text-[11px] w-full text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-zinc-500"}`}>
         {movie.title}
       </span>
     </div>
   );
 }
 
-function CollectionCase({ collection }: { collection: Collection }) {
+function CollectionCase({
+  collection,
+  collectionIndex,
+  isHome,
+  canAddHome,
+  onToggleHome,
+  onSelectMovie,
+}: {
+  collection: Collection;
+  collectionIndex: number;
+  isHome: boolean;
+  canAddHome: boolean;
+  onToggleHome: () => void;
+  onSelectMovie: (movie: SelectedCollectionMovie) => void;
+}) {
   const progress = collection.movies.length > 0
     ? Math.round((collection.collectedCount / collection.movies.length) * 100)
     : 0;
-
-  return (
-    <div className="bg-zinc-900/80 border border-amber-900/30 rounded-xl p-4 shadow-inner shadow-black/40">
-      {/* ケースヘッダー */}
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-amber-300 font-semibold text-sm">
-            {collection.decade}年代 {collection.genre}
-          </h3>
-          <p className="text-zinc-500 text-xs mt-0.5">
-            {collection.collectedCount} / {collection.movies.length} 作品収集
-          </p>
-        </div>
-        <div className="text-right">
-          <span className="text-amber-400 text-lg font-bold">{progress}%</span>
-        </div>
-      </div>
-
-      {/* プログレスバー */}
-      <div className="w-full h-1 bg-zinc-800 rounded-full mb-4 overflow-hidden">
-        <div
-          className="h-full bg-amber-500 rounded-full transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* ポスターグリッド */}
-      <div className="flex flex-nowrap gap-3 justify-center">
-        {collection.movies.map((movie) => (
-          <PosterSlot key={movie.tmdb_id} movie={movie} />
-        ))}
-        {collection.movies.length === 0 && (
-          <p className="text-zinc-600 text-xs py-4">データを読み込み中...</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Room({
-  roomIndex,
-  collections,
-  homeKeys,
-  onToggleRoomHome,
-}: {
-  roomIndex: number;
-  collections: Collection[];
-  homeKeys: Set<string>;
-  onToggleRoomHome: (roomKeys: string[]) => void;
-}) {
-  const roomKeys = collections.map((c) => `${c.genre}-${c.decade}`);
-  const isHome = roomKeys.some((k) => homeKeys.has(k));
-  const canAdd = !isHome && homeKeys.size < 2;
+  const complete = progress === 100;
 
   return (
     <section className="mb-10">
+      {/* セクションヘッダー */}
       <div className="relative flex items-center gap-3 mb-4">
         <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/40" />
-        <h2 className="text-amber-700 text-xs tracking-widest uppercase px-2 shrink-0">
-          展示室 {roomIndex + 1}
+        <h2 className={`text-xs tracking-widest uppercase px-2 shrink-0 flex items-center gap-1.5 ${complete ? "text-amber-400" : "text-amber-700"}`}>
+          {complete && <Trophy size={10} />}
+          コレクション {collectionIndex}
         </h2>
         <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/40" />
         <button
-          onClick={() => onToggleRoomHome(roomKeys)}
-          disabled={!isHome && !canAdd}
+          onClick={onToggleHome}
+          disabled={!isHome && !canAddHome}
           className={`absolute right-0 flex items-center gap-1 text-[10px] transition-colors ${
             isHome
               ? "text-amber-400"
-              : canAdd
+              : canAddHome
               ? "text-zinc-500 hover:text-amber-600"
               : "text-zinc-700 cursor-not-allowed"
           }`}
@@ -136,10 +117,57 @@ function Room({
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 sm:grid-cols-2">
-        {collections.map((c) => (
-          <CollectionCase key={`${c.genre}-${c.decade}`} collection={c} />
-        ))}
+      {/* コレクションカード */}
+      <div className={`bg-zinc-900/80 rounded-xl p-4 shadow-inner shadow-black/40 transition-all ${
+        complete
+          ? "border border-amber-400/50 shadow-lg shadow-amber-400/10"
+          : "border border-amber-900/30"
+      }`}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-amber-300 font-semibold text-sm">
+              {collection.decade}年代 {collection.genre}
+            </h3>
+            <p className="text-zinc-500 text-xs mt-0.5">
+              {collection.collectedCount} / {collection.movies.length} 作品収集
+            </p>
+          </div>
+          <div className="text-right">
+            {complete ? (
+              <span className="text-amber-400 text-xs font-bold tracking-wider">COMPLETE</span>
+            ) : (
+              <span className="text-amber-400 text-lg font-bold">{progress}%</span>
+            )}
+          </div>
+        </div>
+
+        <div className="w-full h-1 bg-zinc-800 rounded-full mb-4 overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${complete ? "bg-amber-400" : "bg-amber-500"}`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="relative flex flex-nowrap gap-2 justify-center">
+          {collection.movies.map((movie) => (
+            <PosterSlot
+              key={movie.tmdb_id}
+              movie={movie}
+              onSelect={() => onSelectMovie({ ...movie, genre: collection.genre, decade: collection.decade })}
+            />
+          ))}
+          {collection.movies.length === 0 && (
+            <p className="text-zinc-600 text-xs py-4">データを読み込み中...</p>
+          )}
+          {/* COMPLETEスタンプ */}
+          {complete && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="text-amber-400/20 font-black text-4xl tracking-widest rotate-[-12deg] border-2 border-amber-400/20 px-3 py-1 rounded select-none">
+                COMPLETE
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -150,20 +178,27 @@ export default function CollectionGallery({
 }: {
   collections: Collection[];
 }) {
-  const collectionKeys = collections.map((c) => `${c.genre}-${c.decade}`);
+  const activeCollections = collections.filter((c) => !isCollectionComplete(c));
+  const completedCollections = collections.filter(isCollectionComplete);
+  const activeKeys = activeCollections.map((c) => `${c.genre}-${c.decade}`);
+  const completedKeys = completedCollections.map((c) => `${c.genre}-${c.decade}`);
+
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
-    new Set(collectionKeys.slice(0, 5))
+    new Set([...activeKeys.slice(0, 5), ...completedKeys])
   );
   const [homeKeys, setHomeKeys] = useState<Set<string>>(new Set());
   const [showPicker, setShowPicker] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [showCompletedSheet, setShowCompletedSheet] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<SelectedCollectionMovie | null>(null);
 
   useEffect(() => {
     const storedSelected = localStorage.getItem(SELECTED_KEYS_STORAGE_KEY);
     if (storedSelected) {
       try {
         const parsed: string[] = JSON.parse(storedSelected);
-        // 現在存在するコレクションのキーのみ残す
-        const valid = parsed.filter((k) => collectionKeys.includes(k));
+        const allKeys = [...activeKeys, ...completedKeys];
+        const valid = parsed.filter((k) => allKeys.includes(k));
         if (valid.length > 0) setSelectedKeys(new Set(valid));
       } catch {}
     }
@@ -171,10 +206,14 @@ export default function CollectionGallery({
     if (storedHome) {
       try {
         const parsed: string[] = JSON.parse(storedHome);
-        const validKeys = collections.map((c) => `${c.genre}-${c.decade}`);
-        const valid = parsed.filter((k) => validKeys.includes(k)).slice(0, 2);
+        const allKeys = collections.map((c) => `${c.genre}-${c.decade}`);
+        const valid = parsed.filter((k) => allKeys.includes(k)).slice(0, 2);
         setHomeKeys(new Set(valid));
       } catch {}
+    }
+    const storedShowCompleted = localStorage.getItem(SHOW_COMPLETED_KEY);
+    if (storedShowCompleted) {
+      setShowCompleted(storedShowCompleted === "true");
     }
   }, [collections]);
 
@@ -191,16 +230,21 @@ export default function CollectionGallery({
     });
   }
 
-  function toggleRoomHome(roomKeys: string[]) {
+  function toggleShowCompleted() {
+    setShowCompleted((prev) => {
+      const next = !prev;
+      localStorage.setItem(SHOW_COMPLETED_KEY, String(next));
+      return next;
+    });
+  }
+
+  function toggleCollectionHome(key: string) {
     setHomeKeys((prev) => {
       const next = new Set(prev);
-      const isHome = roomKeys.some((k) => next.has(k));
-      if (isHome) {
-        roomKeys.forEach((k) => next.delete(k));
-      } else {
-        for (const k of roomKeys) {
-          if (next.size < 2) next.add(k);
-        }
+      if (next.has(key)) {
+        next.delete(key);
+      } else if (next.size < 2) {
+        next.add(key);
       }
       localStorage.setItem(HOME_STORAGE_KEY, JSON.stringify(Array.from(next)));
       return next;
@@ -229,16 +273,13 @@ export default function CollectionGallery({
     );
   }
 
-  const displayed = collections.filter((c) =>
+  const displayedActive = activeCollections.filter((c) =>
     selectedKeys.has(`${c.genre}-${c.decade}`)
   );
-
-  // 部屋ごとにグループ化
-  const rooms = new Map<number, Collection[]>();
-  for (const c of displayed) {
-    if (!rooms.has(c.roomIndex)) rooms.set(c.roomIndex, []);
-    rooms.get(c.roomIndex)!.push(c);
-  }
+  const displayedCompleted = completedCollections.filter((c) =>
+    selectedKeys.has(`${c.genre}-${c.decade}`)
+  );
+  const displayed = [...displayedActive, ...displayedCompleted];
 
   return (
     <>
@@ -248,9 +289,18 @@ export default function CollectionGallery({
           <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
           <h1 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase shrink-0">展示室</h1>
           <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
+          {completedCollections.length > 0 && (
+            <button
+              onClick={() => setShowCompletedSheet(true)}
+              className="absolute left-0 flex items-center gap-1 text-[10px] rounded-lg border border-amber-900/40 bg-zinc-900/95 px-2 py-1.5 text-amber-600 hover:text-amber-400 transition-colors"
+            >
+              <Trophy size={12} />
+              {completedCollections.length}件
+            </button>
+          )}
           <button
             onClick={() => setShowPicker(true)}
-            className="absolute right-0 flex items-center gap-1 text-[10px] text-amber-700 hover:text-amber-500 transition-colors"
+            className="absolute right-0 flex items-center gap-1 text-[10px] rounded-lg border border-amber-900/40 bg-zinc-900/95 px-2 py-1.5 text-amber-700 hover:text-amber-500 transition-colors"
           >
             <SlidersHorizontal size={12} />
             選択
@@ -258,34 +308,130 @@ export default function CollectionGallery({
         </div>
         <p className="text-zinc-600 text-xs">
           {selectedKeys.size} / {collections.length} 件表示中
+          {completedCollections.length > 0 && (
+            <span className="ml-1.5 text-amber-700/60">
+              ／ コンプリート {completedCollections.length}件
+            </span>
+          )}
         </p>
       </header>
 
       {/* ギャラリー */}
       <div>
-        {Array.from(rooms.entries()).map(([roomIndex, roomCollections]) => (
-          <Room
-            key={roomIndex}
-            roomIndex={roomIndex}
-            collections={roomCollections}
-            homeKeys={homeKeys}
-            onToggleRoomHome={toggleRoomHome}
-          />
-        ))}
+        {displayed.map((c, i) => {
+          const key = `${c.genre}-${c.decade}`;
+          const isHome = homeKeys.has(key);
+          const canAddHome = !isHome && homeKeys.size < 2;
+          return (
+            <CollectionCase
+              key={key}
+              collection={c}
+              collectionIndex={i + 1}
+              isHome={isHome}
+              canAddHome={canAddHome}
+              onToggleHome={() => toggleCollectionHome(key)}
+              onSelectMovie={setSelectedMovie}
+            />
+          );
+        })}
       </div>
+
+      {/* 映画詳細ポップアップ */}
+      {selectedMovie && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 flex justify-center px-4">
+          <div className="w-full max-w-lg bg-zinc-900/95 border border-amber-900/40 rounded-xl p-4 flex flex-col gap-2 shadow-2xl shadow-black/60 backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col gap-0.5">
+                <h3 className="text-amber-300 font-semibold text-sm leading-tight">{selectedMovie.title}</h3>
+                {selectedMovie.year && <p className="text-zinc-500 text-xs">{selectedMovie.year}年公開</p>}
+              </div>
+              <button
+                onClick={() => setSelectedMovie(null)}
+                className="text-zinc-600 hover:text-zinc-400 text-base leading-none shrink-0"
+                aria-label="閉じる"
+              >
+                ✕
+              </button>
+            </div>
+            <a
+              href={`https://www.themoviedb.org/movie/${selectedMovie.tmdb_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
+            >
+              TMDBで見る
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* コンプリート済みコレクション ボトムシート */}
+      {showCompletedSheet && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col justify-end">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setShowCompletedSheet(false)}
+          />
+          <div className="relative bg-zinc-900 border-t border-amber-900/30 rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <Trophy size={14} className="text-amber-400" />
+                <h3 className="text-amber-400 font-semibold text-sm">コンプリート済みコレクション</h3>
+              </div>
+              <button
+                onClick={() => setShowCompletedSheet(false)}
+                className="text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {completedCollections.map((c, i) => {
+              const key = `${c.genre}-${c.decade}`;
+              const isHome = homeKeys.has(key);
+              const canAddHome = !isHome && homeKeys.size < 2;
+              return (
+                <CollectionCase
+                  key={key}
+                  collection={c}
+                  collectionIndex={i + 1}
+                  isHome={isHome}
+                  canAddHome={canAddHome}
+                  onToggleHome={() => toggleCollectionHome(key)}
+                  onSelectMovie={setSelectedMovie}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* コレクション選択ボトムシート */}
       {showPicker && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col justify-end">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setShowPicker(false)}
           />
           <div className="relative bg-zinc-900 border-t border-amber-900/30 rounded-t-2xl p-5 max-h-[70vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between gap-2 mb-4">
               <div>
                 <h3 className="text-amber-400 font-semibold text-sm">表示するコレクションを選択</h3>
                 <p className="text-zinc-500 text-xs mt-0.5">最大5件まで選択できます</p>
+              </div>
+              <div className="flex items-center gap-3 shrink-0 ">
+                {completedCollections.length > 0 && (
+                  <button
+                    onClick={toggleShowCompleted}
+                    className="flex items-center gap-2 active:opacity-70 transition-colors"
+                  >
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                      showCompleted ? "bg-amber-500 border-amber-500" : "border-zinc-500"
+                    }`}>
+                      {showCompleted && <Check size={10} className="text-zinc-900" />}
+                    </div>
+                    <p className="text-xs text-amber-300/80 whitespace-nowrap">コンプリート済を表示</p>
+                  </button>
+                )}
               </div>
               <button
                 onClick={() => setShowPicker(false)}
@@ -294,8 +440,9 @@ export default function CollectionGallery({
                 <X size={18} />
               </button>
             </div>
+
             <div className="flex flex-col gap-2">
-              {collections.map((c) => {
+              {activeCollections.map((c) => {
                 const key = `${c.genre}-${c.decade}`;
                 const isSelected = selectedKeys.has(key);
                 const isDisabled = !isSelected && selectedKeys.size >= 5;
@@ -310,17 +457,38 @@ export default function CollectionGallery({
                     } ${isDisabled ? "opacity-40 cursor-not-allowed" : "active:opacity-70"}`}
                   >
                     <div>
-                      <p className="text-sm text-amber-300">
-                        {c.decade}年代 {c.genre}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-0.5">
-                        {c.collectedCount} / {c.movies.length} 作品収集
-                      </p>
+                      <p className="text-sm text-amber-300">{c.decade}年代 {c.genre}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
                     </div>
-                    {isSelected && (
-                      <Check size={16} className="text-amber-400 shrink-0 ml-2" />
-                    )}
+                    {isSelected && <Check size={16} className="text-amber-400 shrink-0 ml-2" />}
                   </button>
+                );
+              })}
+              {showCompleted && completedCollections.map((c) => {
+                const key = `${c.genre}-${c.decade}`;
+                const isSelected = selectedKeys.has(key);
+                const isDisabled = !isSelected && selectedKeys.size >= 5;
+                return (
+                <button
+                  key={`${c.genre}-${c.decade}`}
+                  onClick={() => !isDisabled && toggleKey(key)}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-colors text-left ${
+                    isSelected
+                      ? "border-amber-600/60 bg-amber-900/20"
+                      : "border-zinc-700/60 bg-zinc-800/40"
+                  } ${isDisabled ? "opacity-40 cursor-not-allowed" : "active:opacity-70"}`}
+                >
+                  <div>
+                    <p className="text-sm text-amber-300 flex items-center gap-1.5">
+                      {c.decade}年代 {c.genre}
+                      <Trophy size={11} className="text-amber-500 shrink-0" />
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
+                  </div>
+                  <div>
+                    {isSelected && <Check size={16} className="text-amber-400 shrink-0 ml-2" />}
+                  </div>
+                </button>
                 );
               })}
             </div>

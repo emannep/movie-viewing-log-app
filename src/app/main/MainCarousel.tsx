@@ -92,7 +92,7 @@ export default function MainCarousel({
           >
             <CarouselContent>
               {recommendations.map((movie) => (
-                <CarouselItem key={movie.tmdb_id} className="basis-1/3">
+                <CarouselItem key={movie.tmdb_id} className="basis-1/4">
                   <MovieThumb
                     poster_path={movie.poster_path}
                     title={movie.title}
@@ -122,7 +122,7 @@ export default function MainCarousel({
           <Carousel opts={{ align: "start", loop: true }} className="w-full px-10">
             <CarouselContent>
               {watchlist.map((row) => (
-                <CarouselItem key={row.id} className="basis-1/3">
+                <CarouselItem key={row.id} className="basis-1/4">
                   <MovieThumb
                     poster_path={row.movies?.poster_path ?? null}
                     title={row.movies?.title ?? ""}

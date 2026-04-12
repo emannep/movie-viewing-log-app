@@ -231,10 +231,10 @@ export async function updateMovie(formData: FormData) {
     if (rating !== null) {
       const { error: reviewErr } = await supabase
         .from("user_reviews")
-        .upsert({ user_id: userId, movie_id: movie_id, rating }, { onConflict: "user_id,movie_id" });
+        .upsert({ user_movie_id: id, rating }, { onConflict: "user_movie_id" });
       if (reviewErr) throw new Error(reviewErr.message);
     } else {
-      await supabase.from("user_reviews").delete().eq("user_id", userId).eq("movie_id", movie_id);
+      await supabase.from("user_reviews").delete().eq("user_movie_id", id);
     }
 
     revalidatePath("/main/movies");

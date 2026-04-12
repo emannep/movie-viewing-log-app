@@ -36,28 +36,34 @@ export function getSeasonRange(date: Date): { start: Date; end: Date } {
   if (month >= 9 && month <= 11)
     return { start: new Date(year, 8, 1), end: new Date(year, 10, 30) };
   if (month === 12)
-    return { start: new Date(year, 11, 1), end: new Date(year + 1, 1, 28) };
-  return { start: new Date(year - 1, 11, 1), end: new Date(year, 1, 28) };
+    return { start: new Date(year, 11, 1), end: new Date(year + 1, 2, 0) };
+  return { start: new Date(year - 1, 11, 1), end: new Date(year, 2, 0) };
 }
 
-// レベル: 5ポイントごとに1上昇、上限10
+// レベル: 10ポイントごとに1上昇（上限なし）
 export function calcLevel(points: number): number {
-  return Math.min(Math.floor(points / 5), 10);
+  return Math.floor(points / 10);
 }
 
+// 称号: 2レベルごとに変更
 export const LEVEL_TITLES = [
-  "映画見習い",       // Lv 0
-  "映画ファン",       // Lv 1
-  "映画通",           // Lv 2
-  "シネフィル",       // Lv 3
-  "映画評論家見習い", // Lv 4
-  "映画評論家",       // Lv 5
-  "映画批評家",       // Lv 6
-  "映画プロデューサー", // Lv 7
-  "映画監督",         // Lv 8
-  "映画の神様",       // Lv 9
-  "映画の伝説",       // Lv 10
+  "映画見習い",         // Lv 0〜1
+  "映画ファン",         // Lv 2〜3
+  "映画通",             // Lv 4〜5
+  "シネフィル",         // Lv 6〜7
+  "映画評論家見習い",   // Lv 8〜9
+  "映画評論家",         // Lv 10〜11
+  "映画批評家",         // Lv 12〜13
+  "映画プロデューサー", // Lv 14〜15
+  "映画監督",           // Lv 16〜17
+  "映画の神様",         // Lv 18〜19
+  "映画の伝説",         // Lv 20〜
 ];
+
+export function calcTitle(level: number): string {
+  const index = Math.min(Math.floor(level / 2), LEVEL_TITLES.length - 1);
+  return LEVEL_TITLES[index];
+}
 
 // ────────────────────────────────────────────────
 // 王冠
@@ -74,6 +80,45 @@ export function calcCrownRank(count: number, type: "season" | "annual"): CrownRa
   if (count >= t.silver) return "silver";
   if (count >= t.bronze) return "bronze";
   return "none";
+}
+
+// ランクの強さ順（比較用）
+const RANK_ORDER: Record<CrownRank, number> = {
+  none: 0, bronze: 1, silver: 2, gold: 3, platinum: 4,
+};
+function maxRank(a: CrownRank, b: CrownRank): CrownRank {
+  return RANK_ORDER[a] >= RANK_ORDER[b] ? a : b;
+}
+
+// 絶対評価とパーセンタイル評価の「いいとこ取り」
+// - ユーザー少数時: 絶対閾値が保証として機能（頑張った人を守る）
+// - ユーザー多数時: パーセンタイルが相対評価として機能
+// allCounts: 対象期間に1本以上視聴した全ユーザーの本数リスト
+export function calcCrownRankByPercentile(
+  count: number,
+  allCounts: number[],
+  type: "season" | "annual"
+): { rank: CrownRank; percentile: number | null } {
+  if (count === 0) return { rank: "none", percentile: null };
+
+  // 絶対ランク（固定閾値）
+  const absoluteRank = calcCrownRank(count, type);
+
+  // パーセンタイルランク（他ユーザーとの比較）
+  if (allCounts.length === 0) return { rank: absoluteRank, percentile: null };
+
+  const below = allCounts.filter((v) => v < count).length;
+  const percentile = below / allCounts.length; // 0〜1（1が上位）
+
+  let percentileRank: CrownRank;
+  if (percentile >= 0.95) percentileRank = "platinum";
+  else if (percentile >= 0.85) percentileRank = "gold";
+  else if (percentile >= 0.70) percentileRank = "silver";
+  else if (percentile >= 0.50) percentileRank = "bronze";
+  else percentileRank = "none";
+
+  // 高い方を採用
+  return { rank: maxRank(absoluteRank, percentileRank), percentile };
 }
 
 export function nextThreshold(
