@@ -523,8 +523,10 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
                 {selectedItem.movies?.year && <span>{selectedItem.movies.year}年</span>}
-                {selectedItem.movies?.genres?.length && <span>{selectedItem.movies.genres.join(", ")}</span>}
-                {selectedItem.user_reviews?.rating && <RatingStars rating={selectedItem.user_reviews.rating}/>}
+                {selectedItem.movies?.genres?.length ? (
+                  <span>{selectedItem.movies.genres.join(", ")}</span>
+                ) : null}
+                <RatingStars rating={selectedItem.user_reviews?.rating} />
                 {selectedItem.watched_at && <span>視聴日: {jpDate(selectedItem.watched_at)}</span>}
               </div>
               {selectedItem.memo && (

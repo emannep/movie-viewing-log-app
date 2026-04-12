@@ -89,7 +89,7 @@ function CollectionCase({
   const progress = collection.movies.length > 0
     ? Math.round((collection.collectedCount / collection.movies.length) * 100)
     : 0;
-  const complete = progress === 100;
+  const complete = isCollectionComplete(collection);
 
   return (
     <section className="mb-10">

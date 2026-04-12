@@ -71,6 +71,7 @@ function DateTextAndCalendarField({
   name: string;
   defaultValue?: string;
 }) {
+  const inputId = React.useId();
   const [inputValue, setInputValue] = React.useState(defaultValue ?? "");
   const [selected, setSelected] = React.useState<Date | undefined>(() =>
     defaultValue ? parseDateValue(defaultValue) : undefined
@@ -95,9 +96,10 @@ function DateTextAndCalendarField({
 
   return (
     <div>
-      <label className={labelClass}>{label}</label>
+      <label htmlFor={inputId} className={labelClass}>{label}</label>
       <div className="flex w-full items-center gap-2 rounded-lg border border-amber-900/30 bg-zinc-900 px-3 py-2">
         <input
+          id={inputId}
           name={name}
           type="text"
           inputMode="numeric"

@@ -234,7 +234,11 @@ export async function updateMovie(formData: FormData) {
         .upsert({ user_movie_id: id, rating }, { onConflict: "user_movie_id" });
       if (reviewErr) throw new Error(reviewErr.message);
     } else {
-      await supabase.from("user_reviews").delete().eq("user_movie_id", id);
+      const { error: reviewDeleteErr } = await supabase
+        .from("user_reviews")
+        .delete()
+        .eq("user_movie_id", id);
+      if (reviewDeleteErr) throw new Error(reviewDeleteErr.message);
     }
 
     revalidatePath("/main/movies");

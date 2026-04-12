@@ -114,7 +114,7 @@ export async function getProfileData(): Promise<ProfileData | null> {
       .eq("status", "watched")
       .not("watched_at", "is", null)
       .gte("watched_at", start.toISOString())
-      .lte("watched_at", end.toISOString()),
+      .lt("watched_at", end.toISOString()),
     supabase
       .from("user_movies")
       .select("user_id")

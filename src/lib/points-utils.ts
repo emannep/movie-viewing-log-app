@@ -36,8 +36,8 @@ export function getSeasonRange(date: Date): { start: Date; end: Date } {
   if (month >= 9 && month <= 11)
     return { start: new Date(year, 8, 1), end: new Date(year, 10, 30) };
   if (month === 12)
-    return { start: new Date(year, 11, 1), end: new Date(year + 1, 2, 0) };
-  return { start: new Date(year - 1, 11, 1), end: new Date(year, 2, 0) };
+    return { start: new Date(year, 11, 1), end: new Date(year + 1, 2, 1) };
+  return { start: new Date(year - 1, 11, 1), end: new Date(year, 2, 1) };
 }
 
 // レベル: 10ポイントごとに1上昇（上限なし）
