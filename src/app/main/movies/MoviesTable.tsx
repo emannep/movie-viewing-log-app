@@ -240,11 +240,13 @@ function DeleteConfirmDialog({
   onConfirm,
   onCancel,
   isPending,
+  error,
 }: {
   title: string;
   onConfirm: () => void;
   onCancel: () => void;
   isPending: boolean;
+  error: string | null;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
@@ -256,6 +258,7 @@ function DeleteConfirmDialog({
             「<span className="text-zinc-200 font-medium">{title}</span>」を削除しますか？
           </p>
           <p className="text-zinc-600 text-xs">この操作は取り消せません。</p>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
         <div className="flex gap-3">
           <button
@@ -285,6 +288,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<UserMovieRow | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
   const [showFilter, setShowFilter] = React.useState(false);
   const [filterStatus, setFilterStatus] = React.useState("all");
   const [filterGenre, setFilterGenre] = React.useState("all");
@@ -332,6 +336,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteMovie(deleteTarget.id);
       setDeleteTarget(null);
@@ -339,6 +344,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
       router.refresh();
     } catch (e) {
       console.error(e);
+      setDeleteError("削除中にエラーが発生しました。もう一度お試しください。");
     } finally {
       setIsDeleting(false);
     }
@@ -361,8 +367,9 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
         <DeleteConfirmDialog
           title={deleteTarget.movies?.title ?? ""}
           onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => { setDeleteTarget(null); setDeleteError(null); }}
           isPending={isDeleting}
+          error={deleteError}
         />
       )}
 
