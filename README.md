@@ -8,7 +8,13 @@
 
 ## スクリーンショット
 
-![スクリーンショットプレースホルダー](URL)
+![ログイン画面](docs/screenshots/01_auth_login.png)
+![メイン画面](docs/screenshots/02_main.png)
+![登録画面](docs/screenshots/03_registration.png)
+![一覧画面](docs/screenshots/04_movies.png)
+![コレクション画面](docs/screenshots/05_collection.png)
+![プロフィール画面](docs/screenshots/06_profile.png)
+
 
 ## サービスURL
 
@@ -46,7 +52,7 @@
 
 ## ER図
 
-![ER図プレースホルダー](URL)
+![ER図](docs/er-diagram.png)
 
 ## 工夫した点（アピールポイント）
 
@@ -67,4 +73,13 @@
 - フォロー機能（他ユーザーのレベルや王冠の記録、コレクション閲覧）
 - 記録機能の充実（獲得した称号と王冠の記録閲覧機能）
 - レコメンドの精度向上（ジャンル分けに似たタグ機能の追加による、より詳細な映画の絞り込み）
-- 自分の好みに似た他ユーザーの高評価映画をレコメンドする機能
+- 自分の好みに似た他ユーザーの高評価映画をレコメンドして表示する機能
+- ランキング機能の軽量化（RPC処理）
+
+## TMDB APIについて
+このアプリは TMDB API を使用しています。
+"This product uses the TMDB API but is not
+endorsed or certified by TMDB."
+
+[![TMDBロゴ画像](./public/tmdb_logo.svg)](https://www.themoviedb.org/)
+TMDB公式サイト: https://www.themoviedb.org/

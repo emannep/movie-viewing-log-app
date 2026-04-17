@@ -1,11 +1,20 @@
 import React, { type ReactNode } from 'react';
 import BottomNav from "@/components/BottomNav";
+import Image from 'next/image'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen max-w-lg mx-auto px-4 pt-4 pb-24">
-      {children}
-      <BottomNav />
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow max-w-lg mx-auto w-full px-4 pt-4 pb-8">
+        {children}
+        <BottomNav />
+      </div>
+      <footer className="flex pt-4 pb-[70px] mx-4 items-center justify-center gap-4 text-xs text-stone-400 border-t border-slate-800/50 mt-auto">
+        <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
+          <img src="/tmdb_logo.svg" alt="TMDB" width={80} />
+        </a>
+        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </footer>
     </div>
   );
 }
