@@ -34,13 +34,17 @@ export async function registerMovie(prevState: FormState, formData: FormData): P
   const tmdb_vote_average = tmdbVoteAverageRaw ? Number(tmdbVoteAverageRaw) : null;
 
   if (!title) return { error: "タイトルは必須です" };
-  if (!yearRaw) return { error: "年は必須です" };
 
-  const year = Number(yearRaw);
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  if (isNaN(year)) return { error: "年は数値で入力してください" };
-  if (year < 1888 || year > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
+  const yearStr = String(yearRaw ?? "").trim();
+  let year: number | null = null;
+  if (yearStr && yearStr !== "不明") {
+    const parsed = Number(yearStr);
+    if (isNaN(parsed)) return { error: "年は数値で入力してください" };
+    if (parsed < 1888 || parsed > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
+    year = parsed;
+  }
 
   const genresArray =
     genresRaw === ""
@@ -175,13 +179,17 @@ export async function updateMovie(prevState: FormState, formData: FormData): Pro
   const tmdb_vote_average = tmdbVoteAverageRaw ? Number(tmdbVoteAverageRaw) : null;
 
   if (!title) return { error: "タイトルは必須です" };
-  if (!yearRaw) return { error: "年は必須です" };
 
-  const year = Number(yearRaw);
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  if (isNaN(year)) return { error: "年は数値で入力してください" };
-  if (year < 1888 || year > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
+  const yearStr = String(yearRaw ?? "").trim();
+  let year: number | null = null;
+  if (yearStr && yearStr !== "不明") {
+    const parsed = Number(yearStr);
+    if (isNaN(parsed)) return { error: "年は数値で入力してください" };
+    if (parsed < 1888 || parsed > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
+    year = parsed;
+  }
 
   const genresArray = genresRaw === "" ? [] : genresRaw.split(/[、,]/).map((g) => g.trim()).filter((g) => g.length > 0);
 

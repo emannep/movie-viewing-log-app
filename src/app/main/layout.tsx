@@ -3,7 +3,7 @@ import BottomNav from "@/components/BottomNav";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen max-w-lg mx-auto px-4 pt-4 pb-24">
+    <div className="min-h-[calc(100vh-113px)] max-w-lg mx-auto p-4">
       {children}
       <BottomNav />
     </div>

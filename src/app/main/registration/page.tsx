@@ -1,20 +1,12 @@
 
-import { createClient } from "@/lib/supabase/server"; 
+import { createClient } from "@/lib/supabase/server";
 import RegisterForm from "./registerForm";
+import { GENRES } from "@/lib/genre-map";
 
 export default async function RegisterPage(props: { searchParams?: Promise<any> | any }) {
   const supabase = await createClient();
   const searchParams = await props.searchParams;
   const editId = searchParams?.editId;
-
-  const { data: genres, error: genresError } = await supabase
-    .from("genres")
-    .select("id, name")
-    .order("order_index", { ascending: true });
-
-  if (genresError) {
-    console.error(genresError);
-  }
 
   let initialData = undefined;
   if (editId) {
@@ -54,5 +46,5 @@ export default async function RegisterPage(props: { searchParams?: Promise<any> 
     }
   }
 
-  return <RegisterForm genres={genres ?? []} initialData={initialData} />;
+  return <RegisterForm genres={GENRES} initialData={initialData} />;
 }

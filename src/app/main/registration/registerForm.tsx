@@ -21,7 +21,7 @@ import { format, isValid, parseISO } from "date-fns"
 import { FaRegCalendarAlt } from "react-icons/fa"
 import { registerMovie, updateMovie } from "@/app/actions/registration"
 import { useActionState } from "react"
-import { ChevronLeft, X } from "lucide-react"
+import { ChevronLeft, ChevronDown, X } from "lucide-react"
 import { ja } from "date-fns/locale"
 
 
@@ -146,7 +146,7 @@ function DateTextAndCalendarField({
   );
 }
 
-export default function RegisterForm({ genres, initialData }: { genres: any[]; initialData?: any }) {
+export default function RegisterForm({ genres, initialData }: { genres: { name: string; tmdbId: number }[]; initialData?: any }) {
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
 
@@ -192,7 +192,7 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
     setSearchResults([]);
     try {
       const res = await fetch(
-        `/api/tmdb/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`
+        `/api/TMDB/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`
       );
       const data = await res.json();
       if (data.results) {
@@ -216,9 +216,9 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
     if (m.genre_ids?.length > 0) {
       for (const gid of m.genre_ids) {
         const tmdbName = TMDB_GENRE_MAP[gid];
-        if (tmdbName) {
-          const match = genres.find((g: any) => g.name === tmdbName);
-          if (match) { setGenre(match.name); break; }
+        if (tmdbName && genres.some((g) => g.name === tmdbName)) {
+          setGenre(tmdbName);
+          break;
         }
       }
     }
@@ -335,15 +335,48 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
             <AccordionContent forceMount className="px-3 pb-3 flex flex-col gap-2">
               <div>
                 <label className={labelClass}>公開年度</label>
-                <input
-                  name="year"
-                  type="number"
-                  min="1888"
-                  max={maxYear}
-                  className={fieldClass}
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                />
+                <div className="flex w-full items-center gap-2 rounded-lg border border-amber-900/30 bg-zinc-900 px-3 py-2">
+                  <input
+                    name="year"
+                    type="text"
+                    inputMode="numeric"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none"
+                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-amber-700 hover:text-amber-500 transition-colors"
+                        aria-label="年代一覧から選択"
+                      >
+                        <ChevronDown size={16} />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-28 p-0 bg-zinc-900 border-amber-900/40" align="end">
+                      <div className="max-h-56 overflow-y-auto">
+                        {["不明", ...Array.from(
+                          { length: maxYear - 1888 + 1 },
+                          (_, i) => String(maxYear - i)
+                        )].map((y) => (
+                          <button
+                            key={y}
+                            type="button"
+                            onClick={() => setYear(y === "不明" ? "" : y)}
+                            className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
+                              (y === "不明" && year === "") || year === y
+                                ? "bg-amber-900/40 text-amber-300"
+                                : "text-zinc-100 hover:bg-amber-900/20"
+                            }`}
+                          >
+                            {y}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
 
               <div>
@@ -353,8 +386,8 @@ export default function RegisterForm({ genres, initialData }: { genres: any[]; i
                     <SelectValue placeholder="ジャンルを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {genres?.map((g: any) => (
-                      <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
+                    {genres?.map((g) => (
+                      <SelectItem key={g.name} value={g.name}>{g.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

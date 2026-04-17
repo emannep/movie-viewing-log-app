@@ -44,7 +44,7 @@ export default async function MainPage() {
   const watchlist = seededShuffle(allWatchlist, weekSeed).slice(0, 10);
 
   return (
-    <div className="w-full flex flex-col gap-3 min-h-[calc(100dvh-6rem)]">
+    <div className="w-full flex flex-col gap-3">
 
       {/* 館名プレート */}
       <header className="flex flex-col items-center pt-2">
