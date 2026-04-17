@@ -169,6 +169,11 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
 
+  const yearOptions = React.useMemo(() => [
+    "不明",
+    ...Array.from({ length: maxYear - 1888 + 1 }, (_, i) => String(maxYear - i))
+  ], [maxYear]);
+
   const today = toDateValue(new Date());
   const isEdit = !!initialData;
 
@@ -187,7 +192,7 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
 
 
   const [title, setTitle] = React.useState(initialData?.movies?.title ?? "");
-  const [year, setYear] = React.useState(initialData?.movies?.year ?? "");
+  const [year, setYear] = React.useState(initialData?.movies?.year != null ? String(initialData.movies.year) : "");
   const [genre, setGenre] = React.useState(initialData?.movies?.genres?.[0] ?? "");
   const [tmdbId, setTmdbId] = React.useState(initialData?.movies?.tmdb_id ?? "");
   const [posterPath, setPosterPath] = React.useState(initialData?.movies?.poster_path ?? "");
@@ -377,10 +382,7 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
                     </PopoverTrigger>
                     <PopoverContent className="w-28 p-0 bg-zinc-900 border-amber-900/40" align="end">
                       <div className="max-h-56 overflow-y-auto">
-                        {React.useMemo(() => ["不明", ...Array.from(
-                          { length: maxYear - 1888 + 1 },
-                          (_, i) => String(maxYear - i)
-                        )], [maxYear]).map((y) => (
+                        {yearOptions.map((y) => (
                           <button
                             key={y}
                             type="button"

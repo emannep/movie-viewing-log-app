@@ -9,6 +9,25 @@ import { awardPoints } from "./points";
 
 export type FormState = { error: string } | null;
 
+function parseYear(yearRaw: FormDataEntryValue | null, maxYear: number): { year: number | null; error?: string } {
+  const yearStr = String(yearRaw ?? "").trim();
+  if (!yearStr || yearStr === "不明") {
+    return { year: null };
+  }
+
+  // Number()だけでは "1e3", "0x7e0", "2020.5" などを許容してしまうため、正規表現で4桁の数字に限定
+  if (!/^\d{4}$/.test(yearStr)) {
+    return { year: null, error: "年は4桁の数値で入力してください" };
+  }
+
+  const parsed = Number(yearStr);
+  if (parsed < 1888 || parsed > maxYear) {
+    return { year: null, error: `年は 1888〜${maxYear} の間で入力してください` };
+  }
+
+  return { year: parsed };
+}
+
 export async function registerMovie(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient();
 
@@ -37,14 +56,10 @@ export async function registerMovie(prevState: FormState, formData: FormData): P
 
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  const yearStr = String(yearRaw ?? "").trim();
-  let year: number | null = null;
-  if (yearStr && yearStr !== "不明") {
-    const parsed = Number(yearStr);
-    if (isNaN(parsed)) return { error: "年は数値で入力してください" };
-    if (parsed < 1888 || parsed > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
-    year = parsed;
-  }
+  
+  const parsedYearData = parseYear(yearRaw, maxYear);
+  if (parsedYearData.error) return { error: parsedYearData.error };
+  const year = parsedYearData.year;
 
   const genresArray =
     genresRaw === ""
@@ -182,14 +197,10 @@ export async function updateMovie(prevState: FormState, formData: FormData): Pro
 
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
-  const yearStr = String(yearRaw ?? "").trim();
-  let year: number | null = null;
-  if (yearStr && yearStr !== "不明") {
-    const parsed = Number(yearStr);
-    if (isNaN(parsed)) return { error: "年は数値で入力してください" };
-    if (parsed < 1888 || parsed > maxYear) return { error: `年は 1888〜${maxYear} の間で入力してください` };
-    year = parsed;
-  }
+  
+  const parsedYearData = parseYear(yearRaw, maxYear);
+  if (parsedYearData.error) return { error: parsedYearData.error };
+  const year = parsedYearData.year;
 
   const genresArray = genresRaw === "" ? [] : genresRaw.split(/[、,]/).map((g) => g.trim()).filter((g) => g.length > 0);
 
