@@ -146,7 +146,26 @@ function DateTextAndCalendarField({
   );
 }
 
-export default function RegisterForm({ genres, initialData }: { genres: { name: string; tmdbId: number }[]; initialData?: any }) {
+export interface InitialData {
+  id: string | number;
+  status: string;
+  memo?: string | null;
+  watched_at?: string | Date | null;
+  user_reviews?: {
+    rating?: number | string | null;
+  };
+  movies: {
+    id: string | number;
+    title: string;
+    year?: string | number | null;
+    genres?: string[] | null;
+    tmdb_id?: string | number | null;
+    poster_path?: string | null;
+    tmdb_vote_average?: string | number | null;
+  };
+}
+
+export default function RegisterForm({ genres, initialData }: { genres: { name: string; tmdbId: number }[]; initialData?: InitialData }) {
   const currentYear = new Date().getFullYear();
   const maxYear = currentYear + 10;
 
@@ -192,7 +211,7 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
     setSearchResults([]);
     try {
       const res = await fetch(
-        `/api/TMDB/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`
+        `/api/tmdb/search?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}`
       );
       const data = await res.json();
       if (data.results) {
@@ -340,6 +359,8 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
                     name="year"
                     type="text"
                     inputMode="numeric"
+                    pattern="\d{4}"
+                    maxLength={4}
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                     className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none"
@@ -356,10 +377,10 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
                     </PopoverTrigger>
                     <PopoverContent className="w-28 p-0 bg-zinc-900 border-amber-900/40" align="end">
                       <div className="max-h-56 overflow-y-auto">
-                        {["不明", ...Array.from(
+                        {React.useMemo(() => ["不明", ...Array.from(
                           { length: maxYear - 1888 + 1 },
                           (_, i) => String(maxYear - i)
-                        )].map((y) => (
+                        )], [maxYear]).map((y) => (
                           <button
                             key={y}
                             type="button"

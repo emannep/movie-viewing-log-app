@@ -81,4 +81,5 @@
 "This product uses the TMDB API but is not
 endorsed or certified by TMDB."
 
-![TMDBロゴ画像](./public/tmdb_logo.svg) → tmdb公式サイト（https://www.themoviedb.org/）
+[![TMDBロゴ画像](./public/tmdb_logo.svg)](https://www.themoviedb.org/)
+TMDB公式サイト: https://www.themoviedb.org/
