@@ -46,13 +46,13 @@ function PosterSlot({
           />
         ) : (
           <div className="w-full h-full bg-zinc-800 flex flex-col items-center justify-center gap-1">
-            <span className={`text-xs text-center px-1 leading-tight ${movie.collected ? "text-amber-400" : "text-zinc-600"}`}>
+            <span className={`text-sm text-center px-1 leading-tight ${movie.collected ? "text-amber-400" : "text-neutral-300"}`}>
               {movie.title}
             </span>
           </div>
         )}
         {/* ランクバッジ */}
-        <div className={`absolute top-1 left-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${rankStyle.bg} ${rankStyle.text}`}>
+        <div className={`absolute top-1 left-1 w-5 h-5 rounded-full flex items-center justify-center text-sm font-bold ${rankStyle.bg} ${rankStyle.text}`}>
           {movie.rank}
         </div>
         {movie.collected && (
@@ -60,11 +60,11 @@ function PosterSlot({
         )}
         {!movie.collected && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-zinc-500 text-2xl">?</span>
+            <span className="text-neutral-300 text-2xl">?</span>
           </div>
         )}
       </button>
-      <span className={`text-[11px] w-full text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-zinc-500"}`}>
+      <span className={`text-sm w-full text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-neutral-300"}`}>
         {movie.title}
       </span>
     </div>
@@ -96,23 +96,23 @@ function CollectionCase({
       {/* セクションヘッダー */}
       <div className="relative flex items-center gap-3 mb-4">
         <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/40" />
-        <h2 className={`text-xs tracking-widest uppercase px-2 shrink-0 flex items-center gap-1.5 ${complete ? "text-amber-400" : "text-amber-700"}`}>
-          {complete && <Trophy size={10} />}
+        <h2 className={`text-base tracking-widest uppercase px-2 shrink-0 flex items-center gap-1.5 ${complete ? "text-amber-400" : "text-amber-700"}`}>
+          {complete && <Trophy size={16} />}
           コレクション {collectionIndex}
         </h2>
         <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/40" />
         <button
           onClick={onToggleHome}
           disabled={!isHome && !canAddHome}
-          className={`absolute right-0 flex items-center gap-1 text-[10px] transition-colors ${
+          className={`absolute right-0 flex items-center gap-1 text-sm transition-colors ${
             isHome
               ? "text-amber-400"
               : canAddHome
-              ? "text-zinc-500 hover:text-amber-600"
-              : "text-zinc-700 cursor-not-allowed"
+              ? "text-neutral-300 hover:text-amber-600"
+              : "text-neutral-300 cursor-not-allowed"
           }`}
         >
-          <Home size={10} />
+          <Home size={14} />
           {isHome ? "表示中" : "ホームに表示"}
         </button>
       </div>
@@ -125,16 +125,16 @@ function CollectionCase({
       }`}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-amber-300 font-semibold text-sm">
+            <h3 className="text-amber-300 font-semibold text-base">
               {collection.decade}年代 {collection.genre}
             </h3>
-            <p className="text-zinc-500 text-xs mt-0.5">
+            <p className="text-neutral-300 text-sm mt-0.5">
               {collection.collectedCount} / {collection.movies.length} 作品収集
             </p>
           </div>
           <div className="text-right">
             {complete ? (
-              <span className="text-amber-400 text-xs font-bold tracking-wider">COMPLETE</span>
+              <span className="text-amber-400 text-sm font-bold tracking-wider">COMPLETE</span>
             ) : (
               <span className="text-amber-400 text-lg font-bold">{progress}%</span>
             )}
@@ -157,7 +157,7 @@ function CollectionCase({
             />
           ))}
           {collection.movies.length === 0 && (
-            <p className="text-zinc-600 text-xs py-4">データを読み込み中...</p>
+            <p className="text-neutral-300 text-sm py-4">データを読み込み中...</p>
           )}
           {/* COMPLETEスタンプ */}
           {complete && (
@@ -257,15 +257,15 @@ export default function CollectionGallery({
         <header className="flex flex-col items-center gap-1 pt-1">
           <div className="flex items-center gap-3 w-full">
             <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
-            <h1 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">展示室</h1>
+            <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">展示室</h1>
             <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
           </div>
-          <p className="text-zinc-600 text-xs">映画を登録してコレクションを解放しよう</p>
+          <p className="text-neutral-300 text-sm">映画を登録してコレクションを解放しよう</p>
         </header>
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
           <div className="text-5xl opacity-30">🏛️</div>
-          <p className="text-zinc-400 text-sm">まだコレクションが解放されていません</p>
-          <p className="text-zinc-600 text-xs">
+          <p className="text-neutral-300 text-base">まだコレクションが解放されていません</p>
+          <p className="text-neutral-300 text-sm">
             同じジャンルの映画を3本登録すると、最初の展示室が解放されます
           </p>
         </div>
@@ -287,29 +287,29 @@ export default function CollectionGallery({
       <header className="flex flex-col items-center gap-1 pt-1">
         <div className="relative flex items-center gap-3 w-full">
           <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
-          <h1 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase shrink-0">展示室</h1>
+          <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase shrink-0">展示室</h1>
           <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
           {completedCollections.length > 0 && (
             <button
               onClick={() => setShowCompletedSheet(true)}
-              className="absolute left-0 flex items-center gap-1 text-[10px] rounded-lg border border-amber-900/40 bg-zinc-900/95 px-2 py-1.5 text-amber-600 hover:text-amber-400 transition-colors"
+              className="absolute left-0 flex items-center gap-1 text-sm rounded-lg border border-amber-700/40 bg-zinc-900/95 px-2 py-1.5 text-amber-600 hover:text-amber-500 transition-colors"
             >
-              <Trophy size={12} />
+              <Trophy size={14} />
               {completedCollections.length}件
             </button>
           )}
           <button
             onClick={() => setShowPicker(true)}
-            className="absolute right-0 flex items-center gap-1 text-[10px] rounded-lg border border-amber-900/40 bg-zinc-900/95 px-2 py-1.5 text-amber-700 hover:text-amber-500 transition-colors"
+            className="absolute right-0 flex items-center gap-1 text-sm rounded-lg border border-amber-700/40 bg-zinc-900/95 px-2 py-1.5 text-amber-600 hover:text-amber-500 transition-colors"
           >
-            <SlidersHorizontal size={12} />
+            <SlidersHorizontal size={16} />
             選択
           </button>
         </div>
-        <p className="text-zinc-600 text-xs">
+        <p className="text-neutral-300 text-sm">
           {selectedKeys.size} / {collections.length} 件表示中
           {completedCollections.length > 0 && (
-            <span className="ml-1.5 text-amber-700/60">
+            <span className="ml-1.5 text-amber-600">
               ／ コンプリート {completedCollections.length}件
             </span>
           )}
@@ -338,16 +338,16 @@ export default function CollectionGallery({
 
       {/* 映画詳細ポップアップ */}
       {selectedMovie && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 flex justify-center px-4">
+        <div className="fixed bottom-18 left-0 right-0 z-40 flex justify-center px-4">
           <div className="w-full max-w-lg bg-zinc-900/95 border border-amber-900/40 rounded-xl p-4 flex flex-col gap-2 shadow-2xl shadow-black/60 backdrop-blur-sm">
             <div className="flex items-start justify-between gap-2">
               <div className="flex flex-col gap-0.5">
-                <h3 className="text-amber-300 font-semibold text-sm leading-tight">{selectedMovie.title}</h3>
-                {selectedMovie.year && <p className="text-zinc-500 text-xs">{selectedMovie.year}年公開</p>}
+                <h3 className="text-amber-300 font-semibold text-base leading-tight">{selectedMovie.title}</h3>
+                {selectedMovie.year && <p className="text-neutral-300 text-sm">{selectedMovie.year}年公開</p>}
               </div>
               <button
                 onClick={() => setSelectedMovie(null)}
-                className="text-zinc-600 hover:text-zinc-400 text-base leading-none shrink-0"
+                className="text-neutral-300 hover:text-neutral-200 text-base leading-none shrink-0"
                 aria-label="閉じる"
               >
                 ✕
@@ -357,7 +357,7 @@ export default function CollectionGallery({
               href={`https://www.themoviedb.org/movie/${selectedMovie.tmdb_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
+              className="text-blue-500 hover:text-blue-400 text-sm underline self-start"
             >
               TMDBで見る
             </a>
@@ -375,12 +375,12 @@ export default function CollectionGallery({
           <div className="relative bg-zinc-900 border-t border-amber-900/30 rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <Trophy size={14} className="text-amber-400" />
-                <h3 className="text-amber-400 font-semibold text-sm">コンプリート済みコレクション</h3>
+                <Trophy size={16} className="text-amber-400" />
+                <h3 className="text-amber-400 font-semibold text-base">コンプリート済みコレクション</h3>
               </div>
               <button
                 onClick={() => setShowCompletedSheet(false)}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="text-neutral-300 hover:text-zinc-300 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -415,8 +415,8 @@ export default function CollectionGallery({
           <div className="relative bg-zinc-900 border-t border-amber-900/30 rounded-t-2xl p-5 max-h-[70vh] overflow-y-auto">
             <div className="flex items-center justify-between gap-2 mb-4">
               <div>
-                <h3 className="text-amber-400 font-semibold text-sm">表示するコレクションを選択</h3>
-                <p className="text-zinc-500 text-xs mt-0.5">最大5件まで選択できます</p>
+                <h3 className="text-amber-400 font-semibold text-base">表示するコレクションを選択</h3>
+                <p className="text-neutral-300 text-sm mt-0.5">最大5件まで選択できます</p>
               </div>
               <div className="flex items-center gap-3 shrink-0 ">
                 {completedCollections.length > 0 && (
@@ -429,13 +429,13 @@ export default function CollectionGallery({
                     }`}>
                       {showCompleted && <Check size={10} className="text-zinc-900" />}
                     </div>
-                    <p className="text-xs text-amber-300/80 whitespace-nowrap">コンプリート済を表示</p>
+                    <p className="text-sm text-amber-300/80 whitespace-nowrap">コンプリート済を表示</p>
                   </button>
                 )}
               </div>
               <button
                 onClick={() => setShowPicker(false)}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="text-neutral-300 hover:text-zinc-300 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -457,8 +457,8 @@ export default function CollectionGallery({
                     } ${isDisabled ? "opacity-40 cursor-not-allowed" : "active:opacity-70"}`}
                   >
                     <div>
-                      <p className="text-sm text-amber-300">{c.decade}年代 {c.genre}</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
+                      <p className="text-base text-amber-300">{c.decade}年代 {c.genre}</p>
+                      <p className="text-sm text-neutral-300 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
                     </div>
                     {isSelected && <Check size={16} className="text-amber-400 shrink-0 ml-2" />}
                   </button>
@@ -475,15 +475,15 @@ export default function CollectionGallery({
                   className={`flex items-center justify-between p-3 rounded-lg border transition-colors text-left ${
                     isSelected
                       ? "border-amber-600/60 bg-amber-900/20"
-                      : "border-zinc-700/60 bg-zinc-800/40"
+                      : "border-neutral-300/60 bg-zinc-800/40"
                   } ${isDisabled ? "opacity-40 cursor-not-allowed" : "active:opacity-70"}`}
                 >
                   <div>
-                    <p className="text-sm text-amber-300 flex items-center gap-1.5">
+                    <p className="text-base text-amber-300 flex items-center gap-1.5">
                       {c.decade}年代 {c.genre}
-                      <Trophy size={11} className="text-amber-500 shrink-0" />
+                      <Trophy size={16} className="text-amber-500 shrink-0" />
                     </p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
+                    <p className="text-sm text-neutral-300 mt-0.5">{c.collectedCount} / {c.movies.length} 作品収集</p>
                   </div>
                   <div>
                     {isSelected && <Check size={16} className="text-amber-400 shrink-0 ml-2" />}

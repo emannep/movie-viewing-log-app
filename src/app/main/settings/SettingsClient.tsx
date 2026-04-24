@@ -10,10 +10,10 @@ type Result = { error?: string; success?: boolean; message?: string; url?: strin
 function StatusMessage({ result }: { result: Result }) {
   if (!result) return null;
   if (result.error) {
-    return <p className="text-red-400 text-sm mt-2">{result.error}</p>;
+    return <p className="text-red-400 text-base mt-2">{result.error}</p>;
   }
   return (
-    <p className="text-green-400 text-sm mt-2">
+    <p className="text-green-400 text-base mt-2">
       {result.message ?? "更新しました"}
     </p>
   );
@@ -110,7 +110,7 @@ export default function SettingsClient({
     <div className="flex flex-col gap-6">
       {/* アイコン */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
-        <h2 className="text-zinc-400 text-xs tracking-widest uppercase mb-4">アイコン画像</h2>
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">アイコン画像</h2>
         <form onSubmit={handleAvatarSubmit}>
           <div className="flex items-center gap-4 mb-4">
             <div
@@ -127,18 +127,18 @@ export default function SettingsClient({
                   unoptimized
                 />
               ) : (
-                <span className="text-3xl text-zinc-500">👤</span>
+                <span className="text-3xl text-neutral-300">👤</span>
               )}
             </div>
             <div className="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-1.5 transition-colors"
+                className="text-base text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-1.5 transition-colors"
               >
                 画像を選択
               </button>
-              <p className="text-zinc-600 text-xs">JPG / PNG / WebP / GIF · 最大2MB</p>
+              <p className="text-neutral-300 text-sm">JPG / PNG / WebP / GIF · 最大2MB</p>
             </div>
           </div>
           <input
@@ -152,7 +152,7 @@ export default function SettingsClient({
           <button
             type="submit"
             disabled={isPendingAvatar}
-            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-sm font-medium transition-colors"
+            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-base font-medium transition-colors"
           >
             {isPendingAvatar ? "アップロード中..." : "アイコンを保存"}
           </button>
@@ -162,19 +162,19 @@ export default function SettingsClient({
 
       {/* 名前 */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
-        <h2 className="text-zinc-400 text-xs tracking-widest uppercase mb-4">表示名</h2>
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">表示名</h2>
         <form onSubmit={handleNameSubmit} className="flex flex-col gap-3">
           <input
             type="text"
             name="displayName"
             defaultValue={initialDisplayName}
             placeholder="表示名を入力"
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500"
+            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-neutral-300 text-base focus:outline-none focus:border-orange-500"
           />
           <button
             type="submit"
             disabled={isPendingName}
-            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-sm font-medium transition-colors"
+            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-base font-medium transition-colors"
           >
             {isPendingName ? "保存中..." : "名前を保存"}
           </button>
@@ -184,19 +184,19 @@ export default function SettingsClient({
 
       {/* メールアドレス */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
-        <h2 className="text-zinc-400 text-xs tracking-widest uppercase mb-4">メールアドレス</h2>
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">メールアドレス</h2>
         <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3">
           <input
             type="email"
             name="email"
             defaultValue={initialEmail}
             placeholder="メールアドレスを入力"
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500"
+            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-neutral-300 text-base focus:outline-none focus:border-orange-500"
           />
           <button
             type="submit"
             disabled={isPendingEmail}
-            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-sm font-medium transition-colors"
+            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-base font-medium transition-colors"
           >
             {isPendingEmail ? "更新中..." : "メールアドレスを変更"}
           </button>
@@ -206,24 +206,24 @@ export default function SettingsClient({
 
       {/* パスワード */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
-        <h2 className="text-zinc-400 text-xs tracking-widest uppercase mb-4">パスワード</h2>
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">パスワード</h2>
         <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
           <input
             type="password"
             name="password"
             placeholder="新しいパスワード（6文字以上）"
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500"
+            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-neutral-300 text-base focus:outline-none focus:border-orange-500"
           />
           <input
             type="password"
             name="confirmPassword"
             placeholder="パスワードを確認"
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500"
+            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-neutral-300 text-base focus:outline-none focus:border-orange-500"
           />
           <button
             type="submit"
             disabled={isPendingPassword}
-            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-sm font-medium transition-colors"
+            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-base font-medium transition-colors"
           >
             {isPendingPassword ? "更新中..." : "パスワードを変更"}
           </button>
@@ -233,7 +233,7 @@ export default function SettingsClient({
 
       {/* ログアウト */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
-        <h2 className="text-zinc-400 text-xs tracking-widest uppercase mb-4">アカウント</h2>
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">アカウント</h2>
         <form
           action={() => {
             startLogout(async () => {
@@ -244,7 +244,7 @@ export default function SettingsClient({
           <button
             type="submit"
             disabled={isPendingLogout}
-            className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-red-900/60 border border-zinc-600 hover:border-red-700/60 disabled:opacity-50 text-sm font-medium text-zinc-300 hover:text-red-300 transition-colors"
+            className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500/60 border border-emerald-600 hover:border-emerald-500/60 disabled:opacity-50 text-base font-medium text-zinc-300 hover:text-zinc-100 transition-colors"
           >
             {isPendingLogout ? "ログアウト中..." : "ログアウト"}
           </button>

@@ -19,14 +19,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between whitespace-nowrap rounded-lg border border-amber-900/30 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 shadow-sm transition-colors data-[placeholder]:text-zinc-600 focus:outline-none focus:border-amber-700/60 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex w-full items-center justify-between whitespace-nowrap rounded-lg border border-amber-900/30 bg-zinc-900 px-3 py-2 text-base text-zinc-100 shadow-sm transition-colors data-[placeholder]:text-neutral-300 focus:outline-none focus:border-amber-700/60 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+      <ChevronDown className="text-amber-700/90 h-4 w-4 shrink-0" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -105,7 +105,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("px-2 py-1.5 text-xs text-amber-700/60 tracking-widest uppercase", className)}
+    className={cn("px-2 py-1.5 text-sm text-amber-700/60 tracking-widest uppercase", className)}
     {...props}
   />
 ))
@@ -118,7 +118,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-2 pr-8 text-sm text-zinc-100 outline-none focus:bg-amber-900/20 focus:text-amber-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-2 pr-8 text-base text-zinc-100 outline-none focus:bg-amber-900/20 focus:text-amber-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}

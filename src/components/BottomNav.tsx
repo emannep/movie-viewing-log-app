@@ -25,12 +25,12 @@ export default function BottomNav() {
               ? pathname === "/main"
               : pathname.startsWith(href);
           const itemClass = `flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-colors ${
-            active ? "text-amber-400" : "text-zinc-500 hover:text-zinc-300"
+            active ? "text-amber-400" : "text-zinc-100 hover:text-zinc-300"
           }`;
           const inner = (
             <>
               <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
-              <span className={`text-[10px] font-medium tracking-wide ${active ? "text-amber-400" : "text-zinc-500"}`}>
+              <span className={`text-sm font-medium tracking-wide ${active ? "text-amber-400" : "text-zinc-100"}`}>
                 {label}
               </span>
             </>

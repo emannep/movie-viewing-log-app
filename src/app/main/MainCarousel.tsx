@@ -35,11 +35,11 @@ function MovieThumb({
           className="w-full rounded object-cover aspect-[2/3] bg-zinc-800"
         />
       ) : (
-        <div className="w-full aspect-[2/3] bg-zinc-800 rounded flex items-center justify-center text-[10px] text-zinc-500">
+        <div className="w-full aspect-[2/3] bg-zinc-800 rounded flex items-center justify-center text-sm text-neutral-300">
           No Image
         </div>
       )}
-      <p className="text-[11px] text-zinc-200 text-center truncate w-full px-1">{title}</p>
+      <p className="text-base text-zinc-200 text-center truncate w-full px-1">{title}</p>
     </div>
   );
 
@@ -73,15 +73,15 @@ export default function MainCarousel({
         <div className="flex items-center gap-3 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
           <div className="flex items-center gap-2">
-            <h2 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">おすすめ映画</h2>
-            <Link href="/main/recommend_movies" className="text-[10px] text-amber-800/70 hover:text-amber-600 tracking-widest uppercase transition-colors">
+            <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">おすすめ映画</h2>
+            <Link href="/main/recommend_movies" className="text-base text-amber-600/80 hover:text-amber-600 tracking-widest uppercase transition-colors">
               全て →
             </Link>
           </div>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
         </div>
         {recommendations.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-2">
+          <p className="text-base text-neutral-300 text-center py-2">
             視聴済み映画を★4以上で登録するとおすすめが表示されます
           </p>
         ) : (
@@ -92,7 +92,7 @@ export default function MainCarousel({
           >
             <CarouselContent>
               {recommendations.map((movie) => (
-                <CarouselItem key={movie.tmdb_id} className="basis-1/4">
+                <CarouselItem key={movie.tmdb_id} className="basis-1/3">
                   <MovieThumb
                     poster_path={movie.poster_path}
                     title={movie.title}
@@ -111,18 +111,18 @@ export default function MainCarousel({
       <section>
         <div className="flex items-center gap-3 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
-          <h2 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">観たいリスト</h2>
+          <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">観たいリスト</h2>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
         </div>
         {watchlist.length === 0 ? (
-          <p className="text-xs text-zinc-500 text-center py-2">
+          <p className="text-base text-neutral-300 text-center py-2">
             「視たい」ステータスで映画を登録しよう！
           </p>
         ) : (
           <Carousel opts={{ align: "start", loop: true }} className="w-full px-10">
             <CarouselContent>
               {watchlist.map((row) => (
-                <CarouselItem key={row.id} className="basis-1/4">
+                <CarouselItem key={row.id} className="basis-1/3">
                   <MovieThumb
                     poster_path={row.movies?.poster_path ?? null}
                     title={row.movies?.title ?? ""}

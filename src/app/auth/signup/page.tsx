@@ -6,13 +6,13 @@
   startTransition()で呼び出す
 */
 import { useState } from "react";
-import { loginAction } from "@/app/actions/login";
-import Link from "next/link";
+import { signupAction } from "@/app/actions/signup";
 
-export default function loginPage() {
+export default function SignupPage() {
   const [error, setError] = useState("");
-  const [isLoginSubmitting, setIsLoginSubmitting] = useState(false);
-
+  const [isSignupSubmitting, setIsSignupSubmitting] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0c0907] px-4">
       <div className="w-full max-w-sm flex flex-col gap-6">
@@ -23,32 +23,44 @@ export default function loginPage() {
             <p className="text-amber-700/70 text-base tracking-[0.35em] uppercase mb-1">Film Museum</p>
             <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
           </div>
-          <p className="mt-3 text-xl text-neutral-300 tracking-widest uppercase">入館手続き</p>
+          <p className="mt-3 text-xl text-neutral-300 tracking-widest uppercase">新規発行</p>
         </div>
 
         <div className="rounded-2xl bg-zinc-950/80 border border-amber-900/30 shadow-xl shadow-black/50">
         <div className="px-6 pt-6 pb-2">
-          <p className="text-lg text-neutral-300">
-            メールアドレスとパスワードを入力してください
+          <p className="text-base text-neutral-300">
+            登録したいメールアドレスと、<br />
+            パスワードを入力してください<br />
+            入力したメールアドレスに確認メールを送ります<br />
+            パスワードは8文字以上で入力してください
           </p>
         </div>
 
+        {pendingEmail && (
+          <div className="rounded-xl border border-amber-700/40 bg-amber-950/30 px-5 py-4 text-base text-amber-300 text-center">
+            <p className="text-lg mb-1">📧 確認メールを送信しました</p>
+            <p className="text-amber-500 text-base">{pendingEmail} に届いたメールのリンクをクリックして登録を完了してください</p>
+          </div>
+        )}
+
         <form
           className="px-6 pb-6 space-y-4 pt-2"
-          action={async (formData) => { 
+          action={async (formData) => {
             setError("");
-            setIsLoginSubmitting(true);
+            setIsSignupSubmitting(true);
 
-            const result = await loginAction(formData);
+            const result = await signupAction(formData);
             if (result?.error) {
               setError(result.error);
-              setIsLoginSubmitting(false);
+              setIsSignupSubmitting(false);
+            } else if (result?.pendingEmail) {
+              setPendingEmail(result.pendingEmail);
             }
           }}
         >
           <div className="flex flex-col gap-1">
             <label className="text-base text-amber-700/80 tracking-widest uppercase">
-              メールアドレス
+              登録するメールアドレス
             </label>
             <input
               name="email"
@@ -61,7 +73,7 @@ export default function loginPage() {
 
           <div className="flex flex-col gap-1">
             <label className="text-base text-amber-700/80 tracking-widest uppercase">
-              パスワード
+              パスワード（8文字以上）
             </label>
             <input
               name="password"
@@ -80,18 +92,12 @@ export default function loginPage() {
             <button
               type="submit"
               name="mode"
-              value="login"
-              disabled={isLoginSubmitting}
+              value="signup"
+              disabled={isSignupSubmitting}
               className="w-full py-2.5 rounded-xl bg-amber-800 hover:bg-amber-700 disabled:opacity-50 text-amber-100 font-semibold text-lg tracking-wide transition-colors"
             >
-              {isLoginSubmitting ? "入館中..." : "入館する"}
+              {isSignupSubmitting ? "作成中..." : "アカウント作成"}
             </button>
-            <p className="text-center text-base text-neutral-300">または</p>
-            <Link href="/auth/signup">
-              <button className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 border border-amber-900/30 text-zinc-300 font-medium text-lg transition-colors">
-                新規アカウント作成
-              </button>
-            </Link>
           </div>
         </form>
         </div>

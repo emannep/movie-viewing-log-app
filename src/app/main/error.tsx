@@ -25,10 +25,10 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
-      <p className="text-zinc-400 text-sm">ページの読み込みに失敗しました</p>
+      <p className="text-zinc-400 text-base">ページの読み込みに失敗しました</p>
       <button
         onClick={() => reset()}
-        className="text-xs text-amber-600 hover:text-amber-400 underline underline-offset-2 transition-colors"
+        className="text-sm text-amber-600 hover:text-amber-400 underline underline-offset-2 transition-colors"
       >
         再試行する
       </button>

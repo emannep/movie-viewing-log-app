@@ -9,13 +9,13 @@ export default function RootPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-lg rounded-2xl bg-zinc-950/80 border border-slate-700/80 shadow-xl shadow-black/40 backdrop-blur">
         <div className="px-8 pt-8 pb-6">
-          <p className="text-xs font-semibold tracking-widest text-orange-300 uppercase">
+          <p className="text-sm font-semibold tracking-widest text-orange-300 uppercase">
             Movies Viewing Log
           </p>
-          <h1 className="flex justify-center items-center text-center mt-2 text-2xl font-semibold text-orange-300 tracking-tight">
+          <h1 className="flex justify-center items-center text-center mt-4 text-4xl font-semibold text-orange-300 tracking-tight">
             「あなたの映画博物館」
           </h1>
-          <p className="mt-6 text-sm text-center text-slate-300 leading-relaxed">
+          <p className="mt-6 text-base text-center text-slate-300 leading-relaxed">
             視聴した映画のジャンルと評価を元に、<br />
             あなたの好みに合ったおすすめ映画を表示したり、<br />
             人気映画のコレクション機能で<br />
@@ -32,7 +32,7 @@ export default function RootPage() {
             href="/auth/login"
           >
             <Button size="lg"
-              className="bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
+              className="w-full h-16 text-xl bg-red-900 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-200"
             >
               ログイン画面へ進む
             </Button>
