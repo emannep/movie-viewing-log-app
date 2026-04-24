@@ -49,10 +49,10 @@ export default async function MainPage() {
       {/* 館名プレート */}
       <header className="flex flex-col items-center pt-2">
         <div className="border border-amber-800/50 rounded-sm px-8 py-2.5 bg-amber-950/20 text-center shadow-inner shadow-amber-950/20">
-          <p className="text-amber-700/80 text-[10px] tracking-[0.35em] uppercase mb-0.5">
+          <p className="text-amber-700/80 text-base tracking-[0.35em] uppercase mb-0.5">
             Film Museum
           </p>
-          <h1 className="text-amber-300 text-xl font-bold tracking-[0.15em]">
+          <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">
             あなたの映画博物館
           </h1>
         </div>

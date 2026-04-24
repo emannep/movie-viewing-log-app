@@ -18,7 +18,7 @@
 
 ## サービスURL
 
-<URL>
+https://movie-viewing-log-app.vercel.app/
 
 ## 制作背景・目的
 

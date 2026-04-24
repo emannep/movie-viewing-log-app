@@ -33,7 +33,7 @@ function CrownBadge({
 
   return (
     <div className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-4 flex flex-col gap-2">
-      <p className="text-zinc-500 text-xs">{typeLabel}王冠</p>
+      <p className="text-amber-300 text-base">{typeLabel}王冠</p>
       {rank !== "none" ? (
         <div className="flex items-center gap-2">
           <Crown
@@ -44,16 +44,16 @@ function CrownBadge({
           />
           <span className={`font-bold text-lg ${color}`}>{label}</span>
           {topPercent !== null && (
-            <span className="text-zinc-500 text-xs ml-1">上位 {topPercent}%</span>
+            <span className="text-neutral-300 text-sm ml-1">上位 {topPercent}%</span>
           )}
         </div>
       ) : (
-        <p className="text-zinc-600 text-sm">まだ獲得していません</p>
+        <p className="text-neutral-300 text-base">まだ獲得していません</p>
       )}
-      <p className="text-zinc-500 text-xs">
+      <p className="text-neutral-300 text-sm">
         {type === "season" ? "今期" : "今年"} {count} 本
         {nextThreshold && (
-          <span className="text-amber-600 ml-1">
+          <span className="text-neutral-300 ml-1">
             （次: {nextThreshold} 本〜）
           </span>
         )}
@@ -85,12 +85,12 @@ export default async function ProfilePage() {
             <div className="w-16" />
             <div className="flex items-center gap-3">
               <div className="h-px w-6 bg-amber-900/50" />
-              <h1 className="text-amber-600/90 text-[10px] tracking-[0.3em] uppercase">プロフィール</h1>
+              <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">プロフィール</h1>
               <div className="h-px w-6 bg-amber-900/50" />
             </div>
             <Link
               href="/main/settings"
-              className="text-zinc-500 text-xs hover:text-zinc-300 transition-colors w-16 text-right"
+              className="text-neutral-300 text-sm hover:text-zinc-300 transition-colors w-16 text-right"
             >
               設定 →
             </Link>
@@ -110,7 +110,7 @@ export default async function ProfilePage() {
                 unoptimized
               />
             ) : (
-              <span className="text-3xl text-zinc-500">👤</span>
+              <span className="text-3xl text-neutral-300">👤</span>
             )}
           </div>
           <div className="text-center">
@@ -122,7 +122,7 @@ export default async function ProfilePage() {
 
         {/* レベル・称号 */}
         <section className="mb-6">
-          <h2 className="text-amber-700/70 text-[10px] tracking-[0.3em] uppercase mb-3">
+          <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase mb-3">
             レベル
           </h2>
           <div className="bg-amber-950/30 border border-amber-700/40 rounded-xl p-5">
@@ -131,7 +131,7 @@ export default async function ProfilePage() {
                 <span className="text-amber-300 font-bold text-3xl">Lv {level}</span>
                 <span className="text-zinc-300 text-base ml-3">{title}</span>
               </div>
-              <span className="text-zinc-500 text-sm">{totalPoints} pt</span>
+              <span className="text-neutral-300 text-base">{totalPoints} pt</span>
             </div>
             <div className="mt-3">
               <div className="w-full bg-zinc-800 rounded-full h-1.5">
@@ -140,7 +140,7 @@ export default async function ProfilePage() {
                   style={{ width: `${Math.min((totalPoints % 10) / 10 * 100, 100)}%` }}
                 />
               </div>
-              <p className="text-zinc-600 text-xs mt-1.5">
+              <p className="text-neutral-300 text-sm mt-1.5">
                 次のレベルまで {10 - (totalPoints % 10)} pt
                 <span className="ml-2">（コレクション映画: 2pt / その他: 1pt）</span>
               </p>
@@ -150,7 +150,7 @@ export default async function ProfilePage() {
 
         {/* 王冠 */}
         <section>
-          <h2 className="text-amber-700/70 text-[10px] tracking-[0.3em] uppercase mb-3">
+          <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase mb-3">
             王冠
           </h2>
           <div className="flex flex-col gap-3">

@@ -9,7 +9,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         {children}
         <BottomNav />
       </div>
-      <footer className="flex pt-4 pb-[70px] mx-4 items-center justify-center gap-4 text-xs text-stone-400 border-t border-slate-800/50 mt-auto">
+      <footer className="flex pt-4 pb-[78px] mx-4 items-center justify-center gap-4 text-sm text-stone-400 border-t border-slate-800/50 mt-auto">
         <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
           <img src="/tmdb_logo.svg" alt="TMDB" width={80} />
         </a>

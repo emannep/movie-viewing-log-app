@@ -18,14 +18,14 @@ export default async function RecommendMoviesPage() {
           <h1 className="text-xl font-bold text-orange-300">おすすめ映画</h1>
           <Link
             href="/main"
-            className="text-sm text-zinc-400 hover:text-zinc-200 transition"
+            className="text-base text-neutral-300 hover:text-zinc-200 transition"
           >
             ← 戻る
           </Link>
         </header>
 
         {movies.length === 0 ? (
-          <p className="text-center text-zinc-400 py-12">
+          <p className="text-center text-neutral-300 py-12">
             視聴済み映画を★4以上で登録するとおすすめが表示されます
           </p>
         ) : (
@@ -42,14 +42,14 @@ export default async function RecommendMoviesPage() {
                     className="w-full aspect-[2/3] object-cover bg-zinc-800"
                   />
                 ) : (
-                  <div className="w-full aspect-[2/3] bg-zinc-800 flex items-center justify-center text-sm text-zinc-500">
+                  <div className="w-full aspect-[2/3] bg-zinc-800 flex items-center justify-center text-base text-neutral-300">
                     No Image
                   </div>
                 )}
                 <div className="p-3 flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-zinc-100 line-clamp-2">{movie.title}</p>
-                  <p className="text-xs text-zinc-400">{movie.year}</p>
-                  <p className="text-xs text-yellow-400">★ {movie.tmdb_vote_average.toFixed(1)}</p>
+                  <p className="text-base font-semibold text-zinc-100 line-clamp-2">{movie.title}</p>
+                  <p className="text-sm text-neutral-300">{movie.year}</p>
+                  <p className="text-sm text-yellow-400">★ {movie.tmdb_vote_average.toFixed(1)}</p>
                 </div>
               </div>
             ))}

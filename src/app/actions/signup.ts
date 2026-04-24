@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
-export async function loginAction(formData: FormData) {
+export async function signupAction(formData: FormData) {
   const supabase = await createClient();
 
   const rawEmail = formData.get('email') as string | null;
@@ -15,14 +15,21 @@ export async function loginAction(formData: FormData) {
     return { error: "メールとパスワードは必須です" };
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  if (password.length < 8) {
+    return { error: "パスワードは8文字以上で入力してください" };
+  }
+
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
+    },
   });
 
   if (error) {
     return { error: error.message };
   }
 
-  redirect("/main")
+  return { pendingEmail: email };
 }

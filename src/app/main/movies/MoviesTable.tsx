@@ -55,9 +55,9 @@ function jpDate(dateStr?: string | null) {
 }
 
 function RatingStars({ rating }: { rating: number | null | undefined }) {
-  if (rating == null) return <span className="text-zinc-600 text-xs">未評価</span>;
+  if (rating == null) return <span className="text-neutral-300 text-sm">未評価</span>;
   return (
-    <span className="text-xs tracking-tight leading-none">
+    <span className="text-sm tracking-tight leading-none">
       {Array.from({ length: 5 }, (_, i) =>
         i < rating ? (
           <span key={i} className="text-amber-400">★</span>
@@ -86,18 +86,18 @@ function SortKeyDropdown({ value, onChange }: { value: SortKey; onChange: (v: So
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 bg-zinc-900 border border-amber-900/40 text-amber-300/80 text-xs rounded-lg px-3 py-1.5 transition-colors hover:border-amber-700 min-w-[72px]"
+        className="flex items-center gap-1.5 bg-zinc-900 border border-amber-800 text-amber-300/80 text-sm rounded-lg px-3 py-1.5 transition-colors hover:border-amber-700 min-w-[72px]"
       >
         <span>{label}</span>
         <span className="text-amber-800 ml-auto">▾</span>
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 bg-zinc-900 border border-amber-900/40 rounded-lg overflow-hidden shadow-lg shadow-black/50 min-w-[90px]">
+        <div className="absolute top-full left-0 mt-1 z-50 bg-zinc-900 border border-amber-800 rounded-lg overflow-hidden shadow-lg shadow-black/50 min-w-[90px]">
           {SORT_KEY_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => { onChange(opt.key); setOpen(false); }}
-              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                 opt.key === value ? "text-amber-400 bg-amber-950/40" : "text-zinc-300 hover:bg-zinc-800"
               }`}
             >
@@ -114,7 +114,7 @@ function SortDirToggle({ value, onChange }: { value: SortDir; onChange: (v: Sort
   return (
     <button
       onClick={() => onChange(value === "asc" ? "desc" : "asc")}
-      className="flex items-center justify-center bg-zinc-900 border border-amber-900/40 text-amber-300/80 text-sm rounded-lg w-8 h-[30px] transition-colors hover:border-amber-700"
+      className="flex items-center justify-center bg-zinc-900 border border-amber-800 text-amber-300/80 text-base rounded-lg w-[34px] h-[34px] transition-colors hover:border-amber-700"
     >
       {value === "asc" ? "↑" : "↓"}
     </button>
@@ -156,17 +156,17 @@ function FilterPanel({
   }, [movies]);
 
   const chipClass = (active: boolean) =>
-    `text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+    `text-sm px-2.5 py-1 rounded-full border transition-colors ${
       active
         ? "bg-amber-800/60 border-amber-600/60 text-amber-200"
-        : "bg-zinc-900 border-zinc-700/50 text-zinc-400 hover:border-zinc-500"
+        : "bg-zinc-900 border-neutral-300/50 text-neutral-300 hover:border-neutral-700"
     }`;
 
   return (
-    <div className="bg-zinc-950/80 border border-amber-900/20 rounded-xl p-3 flex flex-col gap-3">
+    <div className="bg-zinc-950/80 border border-amber-900 rounded-xl p-3 flex flex-col gap-3">
       {/* ステータス */}
       <div>
-        <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">ステータス</p>
+        <p className="text-amber-600/90 text-sm tracking-widest uppercase mb-1.5">ステータス</p>
         <div className="flex flex-wrap gap-1.5">
           {[
             { value: "all", label: "全て" },
@@ -182,7 +182,7 @@ function FilterPanel({
 
       {/* 評価（OR複数選択） */}
       <div>
-        <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">
+        <p className="text-amber-600/90 text-sm tracking-widest uppercase mb-1.5">
           評価
           {filterRatings.length > 0 && (
             <button
@@ -218,7 +218,7 @@ function FilterPanel({
       {/* ジャンル */}
       {genres.length > 0 && (
         <div>
-          <p className="text-amber-700/70 text-[10px] tracking-widest uppercase mb-1.5">ジャンル</p>
+          <p className="text-amber-600/90 text-sm tracking-widest uppercase mb-1.5">ジャンル</p>
           <div className="flex flex-wrap gap-1.5">
             <button onClick={() => onGenreChange("all")} className={chipClass(filterGenre === "all")}>
               全て
@@ -254,24 +254,24 @@ function DeleteConfirmDialog({
       <div className="relative w-full max-w-sm bg-zinc-950 border border-amber-900/40 rounded-2xl p-6 shadow-2xl shadow-black/60 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-amber-300 font-semibold text-base">削除の確認</h2>
-          <p className="text-zinc-400 text-sm leading-relaxed">
+          <p className="text-neutral-300 text-base leading-relaxed">
             「<span className="text-zinc-200 font-medium">{title}</span>」を削除しますか？
           </p>
-          <p className="text-zinc-600 text-xs">この操作は取り消せません。</p>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <p className="text-neutral-300 text-sm">この操作は取り消せません。</p>
+          {error && <p className="text-red-400 text-base">{error}</p>}
         </div>
         <div className="flex gap-3">
           <button
             onClick={onCancel}
             disabled={isPending}
-            className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-base font-medium transition-colors disabled:opacity-50"
           >
             キャンセル
           </button>
           <button
             onClick={onConfirm}
             disabled={isPending}
-            className="flex-1 py-2.5 rounded-xl bg-red-900 hover:bg-red-800 text-red-100 text-sm font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-xl bg-red-900 hover:bg-red-800 text-red-100 text-base font-semibold transition-colors disabled:opacity-50"
           >
             {isPending ? "削除中..." : "削除する"}
           </button>
@@ -354,7 +354,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
         <div className="text-5xl opacity-30">🎬</div>
-        <p className="text-zinc-400 text-sm">まだ登録された映画がありません</p>
+        <p className="text-zinc-400 text-base">まだ登録された映画がありません</p>
       </div>
     );
   }
@@ -381,15 +381,15 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
 
           <button
             onClick={() => setShowFilter((v) => !v)}
-            className={`flex items-center gap-1.5 border text-xs rounded-lg px-2.5 py-1.5 transition-colors ${
+            className={`flex justify-center items-center gap-1.5 border text-sm rounded-lg transition-colors w-[34px] h-[34px] ${
               showFilter || activeFilterCount > 0
                 ? "bg-amber-900/40 border-amber-700/60 text-amber-300"
-                : "bg-zinc-900 border-amber-900/40 text-amber-300/80 hover:border-amber-700"
+                : "bg-zinc-900 border-amber-800 text-amber-300/80 hover:border-amber-700"
             }`}
           >
-            <SlidersHorizontal size={13} />
+            <SlidersHorizontal size={16} />
             {activeFilterCount > 0 && (
-              <span className="bg-amber-500 text-black text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="bg-amber-500 text-black text-sm font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -398,12 +398,12 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
           <div className="flex gap-2 ml-auto">
             {selectedId ? (
               <Link href={`/main/registration?editId=${selectedId}`}>
-                <button className="bg-amber-800 hover:bg-amber-700 text-amber-100 text-xs font-semibold rounded-lg px-4 py-1.5 transition-colors">
+                <button className="bg-amber-800 hover:bg-amber-700 text-amber-100 text-sm font-semibold rounded-lg px-4 py-1.5 transition-colors">
                   編集
                 </button>
               </Link>
             ) : (
-              <button disabled className="bg-zinc-800 text-zinc-600 text-xs font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
+              <button disabled className="bg-zinc-800 text-zinc-600 text-sm font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
                 編集
               </button>
             )}
@@ -411,12 +411,12 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
             {selectedId && selectedItem ? (
               <button
                 onClick={() => setDeleteTarget(selectedItem)}
-                className="bg-red-950 hover:bg-red-900 border border-red-900/60 text-red-400 text-xs font-semibold rounded-lg px-4 py-1.5 transition-colors"
+                className="bg-red-950 hover:bg-red-900 border border-red-900/60 text-red-400 text-sm font-semibold rounded-lg px-4 py-1.5 transition-colors"
               >
                 削除
               </button>
             ) : (
-              <button disabled className="bg-zinc-800 text-zinc-600 text-xs font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
+              <button disabled className="bg-zinc-800 text-zinc-600 text-sm font-semibold rounded-lg px-4 py-1.5 cursor-not-allowed">
                 削除
               </button>
             )}
@@ -438,11 +438,11 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
 
         {/* 件数表示 */}
         {activeFilterCount > 0 && (
-          <p className="text-zinc-500 text-xs">
+          <p className="text-neutral-300 text-base">
             {sorted.length} / {movies.length} 件
             <button
               onClick={() => { setFilterStatus("all"); setFilterGenre("all"); setFilterRatings([]); }}
-              className="ml-2 text-amber-800/70 hover:text-amber-600 transition-colors"
+              className="ml-2 text-amber-600/90 hover:text-amber-600 transition-colors"
             >
               絞り込みをクリア
             </button>
@@ -452,7 +452,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
         {/* カードグリッド */}
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center py-12 gap-2 text-center">
-            <p className="text-zinc-500 text-sm">条件に一致する映画がありません</p>
+            <p className="text-neutral-300 text-base">条件に一致する映画がありません</p>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
@@ -479,12 +479,12 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-700 text-xs">
+                      <div className="w-full h-full flex items-center justify-center text-neutral-300 text-sm">
                         No Image
                       </div>
                     )}
                     {item.status && (
-                      <span className={`absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded ${
+                      <span className={`absolute top-1 right-1 text-sm font-bold px-1 py-0.5 rounded ${
                         item.status === "watched"
                           ? "bg-amber-900/90 text-amber-300"
                           : "bg-zinc-800/90 text-zinc-300"
@@ -498,12 +498,12 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
                   </div>
 
                   <div className="bg-zinc-950/90 px-2 py-1.5 flex flex-col gap-0.5 flex-1">
-                    <p className="text-zinc-200 text-[11px] font-medium leading-tight line-clamp-2">
+                    <p className="text-zinc-200 text-sm font-medium leading-tight line-clamp-2">
                       {movie?.title ?? ""}
                     </p>
                     <div className="flex items-center justify-between gap-1">
-                      <p className="text-zinc-600 text-[10px] shrink-0">{movie?.year ?? ""}</p>
-                      {genre && <p className="text-zinc-600 text-[10px] truncate text-right">{genre}</p>}
+                      <p className="text-neutral-300 text-sm shrink-0">{movie?.year ?? ""}</p>
+                      {genre && <p className="text-neutral-300 text-sm truncate text-right">{genre}</p>}
                     </div>
                     <RatingStars rating={item.user_reviews?.rating} />
                   </div>
@@ -515,20 +515,20 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
 
         {/* 選択中の詳細（画面下部固定） */}
         {selectedId && selectedItem && (
-          <div className="fixed bottom-16 left-0 right-0 z-40 flex justify-center px-4">
+          <div className="fixed bottom-18 left-0 right-0 z-40 flex justify-center px-4">
             <div className="w-full max-w-lg bg-zinc-900/95 border border-amber-900/40 rounded-xl p-4 flex flex-col gap-2 shadow-2xl shadow-black/60 backdrop-blur-sm">
               <div className="flex items-start gap-2">
-                <h3 className="[flex:21] min-w-0 break-words text-amber-300 font-semibold text-sm leading-tight">{selectedItem.movies?.title}</h3>
-                <div className="[flex:6] text-center min-w-0 break-words text-zinc-300 text-xs leading-tight pt-0.5">{STATUS_LABELS[selectedItem.status ?? ""] ?? selectedItem.status}</div>
+                <h3 className="[flex:21] min-w-0 break-words text-amber-300 font-semibold text-base leading-tight">{selectedItem.movies?.title}</h3>
+                <div className="[flex:6] text-center min-w-0 break-words text-neutral-300 text-sm leading-tight pt-0.5">{STATUS_LABELS[selectedItem.status ?? ""] ?? selectedItem.status}</div>
                 <button
                   onClick={() => setSelectedId(null)}
-                  className="[flex:1] min-w-0 text-zinc-600 hover:text-zinc-400 text-base leading-none text-center pt-0.5"
+                  className="[flex:1] min-w-0 text-neutral-300 hover:text-neutral-200 text-base leading-none text-center pt-0.5"
                   aria-label="閉じる"
                 >
                   ✕
                 </button>
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-300">
                 {selectedItem.movies?.year && <span>{selectedItem.movies.year}年</span>}
                 {selectedItem.movies?.genres?.length ? (
                   <span>{selectedItem.movies.genres.join(", ")}</span>
@@ -537,7 +537,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
                 {selectedItem.watched_at && <span>視聴日: {jpDate(selectedItem.watched_at)}</span>}
               </div>
               {selectedItem.memo && (
-                <p className="text-zinc-400 text-xs leading-relaxed border-t border-zinc-800 pt-2 mt-1 line-clamp-3">
+                <p className="text-zinc-100 text-sm leading-relaxed border-t border-zinc-800 pt-2 mt-1 line-clamp-3">
                   {selectedItem.memo}
                 </p>
               )}
@@ -546,7 +546,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
                   href={`https://www.themoviedb.org/movie/${selectedItem.movies.tmdb_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-400 text-xs underline self-start"
+                  className="text-blue-500 hover:text-blue-400 text-sm underline self-start"
                   onClick={(e) => e.stopPropagation()}
                 >
                   TMDBで見る

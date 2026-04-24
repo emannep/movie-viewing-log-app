@@ -50,16 +50,16 @@ export default function CollectionUnlockedToast() {
             <Landmark size={18} className="text-amber-400" />
           </div>
           <div>
-            <p className="text-amber-300 font-semibold text-sm">
+            <p className="text-amber-300 font-semibold text-base">
               展示室が解放されました！
             </p>
             {items.map((label) => (
-              <p key={label} className="text-amber-500/80 text-xs mt-0.5">
+              <p key={label} className="text-amber-500/80 text-sm mt-0.5">
                 {label} コレクション
               </p>
             ))}
             <button
-              className="mt-2 text-xs text-amber-600 hover:text-amber-400 underline underline-offset-2 transition-colors"
+              className="mt-2 text-sm text-amber-600 hover:text-amber-400 underline underline-offset-2 transition-colors"
               onClick={() => {
                 setItems([]);
                 router.push("/main/collection");
