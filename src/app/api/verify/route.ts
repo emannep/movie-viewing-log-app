@@ -1,9 +1,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-
 export async function GET(req: Request) {
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
   const token = new URL(req.url).searchParams.get('token');
 
   const { data } = await supabase

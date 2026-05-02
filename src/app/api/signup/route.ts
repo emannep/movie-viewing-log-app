@@ -3,10 +3,9 @@ import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
   const { email } = await req.json();
 
   const token = randomUUID();
