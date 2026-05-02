@@ -81,12 +81,12 @@ export default async function ProfilePage() {
 
         {/* ヘッダー */}
         <header className="mb-6">
-          <div className="flex items-center justify-between">
+          <div className="relative flex items-center justify-between">
             <div className="w-16" />
-            <div className="flex items-center gap-3">
-              <div className="h-px w-6 bg-amber-900/50" />
-              <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">プロフィール</h1>
-              <div className="h-px w-6 bg-amber-900/50" />
+            <div className="absolute inset-x-0 flex items-center justify-center gap-3 pointer-events-none">
+              <div className="h-px w-16 bg-amber-300/50" />
+              <h1 className="text-amber-300 text-base tracking-[0.3em] uppercase">プロフィール</h1>
+              <div className="h-px w-16 bg-amber-300/50" />
             </div>
             <Link
               href="/main/settings"

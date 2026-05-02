@@ -13,7 +13,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
           <img src="/tmdb_logo.svg" alt="TMDB" width={80} />
         </a>
-        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+        <div className="flex flex-col gap-0.5">
+          <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+          <p className="text-xs text-stone-400">映画情報はTMDB APIを活用しています。本サービスはTMDBと独立した個人サービスです。</p>
+        </div>
       </footer>
     </div>
   );

@@ -255,10 +255,10 @@ export default function CollectionGallery({
     return (
       <>
         <header className="flex flex-col items-center gap-1 pt-1">
-          <div className="flex items-center gap-3 w-full">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
-            <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">展示室</h1>
-            <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
+          <div className="flex items-center justify-center gap-3 w-full">
+            <div className="h-px w-16 bg-amber-300/50" />
+            <h1 className="flex items-center justify-center text-amber-300 text-base tracking-[0.3em] uppercase">展示室</h1>
+            <div className="h-px w-16 bg-amber-300/50" />
           </div>
           <p className="text-neutral-300 text-sm">映画を登録してコレクションを解放しよう</p>
         </header>
@@ -285,10 +285,12 @@ export default function CollectionGallery({
     <>
       {/* ヘッダー */}
       <header className="flex flex-col items-center gap-1 pt-1">
-        <div className="relative flex items-center gap-3 w-full">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
-          <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase shrink-0">展示室</h1>
-          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
+        <div className="relative flex items-center w-full h-8">
+          <div className="absolute inset-x-0 flex items-center justify-center gap-3 pointer-events-none">
+            <div className="h-px w-16 bg-amber-300/50" />
+            <h1 className="text-amber-300 text-base tracking-[0.3em] uppercase shrink-0">展示室</h1>
+            <div className="h-px w-16 bg-amber-300/50" />
+          </div>
           {completedCollections.length > 0 && (
             <button
               onClick={() => setShowCompletedSheet(true)}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getRecommendations } from "@/app/actions/recommend";
 import { getUserCollections } from "@/app/actions/collections";
@@ -23,6 +24,15 @@ export default async function MainPage() {
 
   const { data: userRes, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userRes.user) redirect("/auth/login");
+
+  // 新規ユーザーはチュートリアルへ
+  const cookieStore = await cookies();
+  if (!cookieStore.get("tutorial_done")?.value) {
+    const { count } = await supabase
+      .from("user_movies")
+      .select("id", { count: "exact", head: true });
+    if (count === 0) redirect("/tutorial");
+  }
 
   const [recommendations, watchlistResult, collections] = await Promise.all([
     getRecommendations(6),

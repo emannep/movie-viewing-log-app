@@ -14,10 +14,10 @@ export default async function MoviesPage() {
         <CollectionUnlockedToast />
       </Suspense>
 
-      <header className="flex items-center gap-3 pt-1">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
-        <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">収蔵作品一覧</h1>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
+      <header className="flex items-center justify-center gap-3 pt-1">
+        <div className="h-px w-16 bg-amber-300/50" />
+        <h1 className="text-amber-300 text-base tracking-[0.3em] uppercase">収蔵作品一覧</h1>
+        <div className="h-px w-16 bg-amber-300/50" />
       </header>
 
       <MoviesTable movies={movies} />

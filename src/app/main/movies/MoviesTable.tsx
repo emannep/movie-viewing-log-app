@@ -44,6 +44,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
+const PAGE_SIZE = 18;
 
 function jpDate(dateStr?: string | null) {
   if (!dateStr) return "";
@@ -281,6 +282,16 @@ function DeleteConfirmDialog({
   );
 }
 
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [1];
+  if (current > 3) pages.push("...");
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) pages.push(p);
+  if (current < total - 2) pages.push("...");
+  pages.push(total);
+  return pages;
+}
+
 export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   const router = useRouter();
   const [sortKey, setSortKey] = React.useState<SortKey>("created_at");
@@ -293,12 +304,15 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
   const [filterStatus, setFilterStatus] = React.useState("all");
   const [filterGenre, setFilterGenre] = React.useState("all");
   const [filterRatings, setFilterRatings] = React.useState<number[]>([]);
+  const [page, setPage] = React.useState(1);
 
   const activeFilterCount = [
     filterStatus !== "all",
     filterGenre !== "all",
     filterRatings.length > 0,
   ].filter(Boolean).length;
+
+  React.useEffect(() => { setPage(1); }, [sortKey, sortDir, filterStatus, filterGenre, filterRatings]);
 
   const filtered = React.useMemo(() => {
     return (movies ?? []).filter((item) => {
@@ -332,6 +346,9 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
     });
     return copy;
   }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paged = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -456,7 +473,7 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
-            {sorted.map((item) => {
+            {paged.map((item) => {
               const movie = item.movies;
               const selected = selectedId === item.id;
               const genre = movie?.genres?.[0] ?? null;
@@ -510,6 +527,43 @@ export function MoviesTable({ movies }: { movies: UserMovieRow[] }) {
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {/* ページネーション */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1.5 pt-2 pb-4">
+            <button
+              onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              disabled={page === 1}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-amber-800/60 text-amber-300/80 text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-amber-700 transition-colors"
+            >
+              ‹
+            </button>
+            {getPageNumbers(page, totalPages).map((p, i) =>
+              p === "..." ? (
+                <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-amber-800/60 text-sm">…</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => { setPage(p as number); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg border text-sm font-medium transition-colors ${
+                    p === page
+                      ? "bg-amber-900/60 border-amber-600/60 text-amber-200"
+                      : "border-amber-800/40 text-amber-300/60 hover:border-amber-700"
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              disabled={page === totalPages}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-amber-800/60 text-amber-300/80 text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-amber-700 transition-colors"
+            >
+            ›
+            </button>
           </div>
         )}
 

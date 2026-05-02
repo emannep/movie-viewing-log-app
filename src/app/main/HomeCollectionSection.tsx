@@ -87,7 +87,7 @@ function CollectionPreview({
             <p className="text-neutral-300 text-base">
               同じジャンルの映画を3本登録すると展示室が解放されます
             </p>
-            <p className="text-amber-800/70 text-lg tracking-wide mt-0.5">展示室へ →</p>
+            <p className="text-amber-600/80 hover:text-amber-600 text-lg tracking-wide mt-0.5">展示室へ →</p>
           </div>
         )}
       </div>

@@ -1,18 +1,48 @@
+"use client";
 
- "use client";
-
-/*
-  Error: Server Actions cannot be called during initial renderが出るなら
-  startTransition()で呼び出す
-*/
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { signupAction } from "@/app/actions/signup";
 
-export default function SignupPage() {
-  const [error, setError] = useState("");
+function SignupContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const verified = searchParams.get("verified") === "true";
+  const confirmError = searchParams.get("error");
+
+  const [error, setError] = useState(confirmError === "email_confirm_failed" ? "メール確認に失敗しました。もう一度お試しください。" : "");
   const [isSignupSubmitting, setIsSignupSubmitting] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
-  
+
+  useEffect(() => {
+    if (!verified) return;
+    const timer = setTimeout(() => {
+      router.push("/main");
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [verified, router]);
+
+  if (verified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0907] px-4">
+        <div className="w-full max-w-sm flex flex-col gap-6 items-center">
+          <div className="flex flex-col items-center">
+            <div className="border border-amber-800/50 rounded-sm px-8 py-3 bg-amber-950/20 text-center">
+              <p className="text-amber-700/70 text-base tracking-[0.35em] uppercase mb-1">Film Museum</p>
+              <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-zinc-950/80 border border-amber-700/40 shadow-xl shadow-black/50 px-6 py-10 text-center w-full">
+            <p className="text-5xl mb-5">🎬</p>
+            <p className="text-2xl text-amber-300 font-bold tracking-wide mb-3">認証完了！</p>
+            <p className="text-neutral-300 text-base mb-1">メールアドレスの確認が完了しました</p>
+            <p className="text-neutral-500 text-sm">まもなくメインページに移動します...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0c0907] px-4">
       <div className="w-full max-w-sm flex flex-col gap-6">
@@ -37,7 +67,7 @@ export default function SignupPage() {
         </div>
 
         {pendingEmail && (
-          <div className="rounded-xl border border-amber-700/40 bg-amber-950/30 px-5 py-4 text-base text-amber-300 text-center">
+          <div className="rounded-xl border border-amber-700/40 bg-amber-950/30 px-5 py-4 text-base text-amber-300 text-center mx-6">
             <p className="text-lg mb-1">📧 確認メールを送信しました</p>
             <p className="text-amber-500 text-base">{pendingEmail} に届いたメールのリンクをクリックして登録を完了してください</p>
           </div>
@@ -52,10 +82,10 @@ export default function SignupPage() {
             const result = await signupAction(formData);
             if (result?.error) {
               setError(result.error);
-              setIsSignupSubmitting(false);
             } else if (result?.pendingEmail) {
               setPendingEmail(result.pendingEmail);
             }
+            setIsSignupSubmitting(false);
           }}
         >
           <div className="flex flex-col gap-1">
@@ -103,5 +133,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupContent />
+    </Suspense>
   );
 }
