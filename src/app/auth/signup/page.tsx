@@ -82,10 +82,10 @@ function SignupContent() {
             const result = await signupAction(formData);
             if (result?.error) {
               setError(result.error);
-              setIsSignupSubmitting(false);
             } else if (result?.pendingEmail) {
               setPendingEmail(result.pendingEmail);
             }
+            setIsSignupSubmitting(false);
           }}
         >
           <div className="flex flex-col gap-1">

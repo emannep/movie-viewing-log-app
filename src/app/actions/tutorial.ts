@@ -145,7 +145,11 @@ export async function autoRegisterMovies(
         _tmdb_id: m.id,
         _tmdb_vote_average: m.vote_average ?? null,
       })
-      if (error) return { error: error.message }
+      if (error) {
+        revalidatePath("/main")
+        revalidatePath("/main/movies")
+        return { error: error.message }
+      }
 
       if (genresArray.length > 0) {
         const unlockedGenres = await getUnlockedGenres(userId)
@@ -157,6 +161,8 @@ export async function autoRegisterMovies(
       }
     } catch (e) {
       console.error("autoRegister エラー:", e)
+      revalidatePath("/main")
+      revalidatePath("/main/movies")
       return { error: "登録中にエラーが発生しました" }
     }
   }
@@ -174,5 +180,6 @@ export async function completeTutorial() {
     maxAge: 60 * 60 * 24 * 365,
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   })
 }

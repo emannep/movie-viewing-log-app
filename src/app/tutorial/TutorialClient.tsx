@@ -67,21 +67,31 @@ export default function TutorialClient() {
   async function handleAutoRegister() {
     setIsRegistering(true)
     setError("")
-    const result = await autoRegisterMovies(suggestedMovies)
-    if (result && "error" in result) {
-      setError(result.error)
+    try {
+      const result = await autoRegisterMovies(suggestedMovies)
+      if (result && "error" in result) {
+        setError(result.error)
+        return
+      }
+      await completeTutorial()
+      setStep(3)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "登録中にエラーが発生しました")
+    } finally {
       setIsRegistering(false)
-      return
     }
-    await completeTutorial()
-    setStep(3)
-    setIsRegistering(false)
   }
 
   async function handleSkip() {
     setIsSkipping(true)
-    await completeTutorial()
-    router.push("/main")
+    try {
+      await completeTutorial()
+      router.push("/main")
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "エラーが発生しました")
+    } finally {
+      setIsSkipping(false)
+    }
   }
 
   const Header = () => (
