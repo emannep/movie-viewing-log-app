@@ -15,7 +15,7 @@ export default async function RecommendMoviesPage() {
       <div className="px-6 pt-4 pb-6">
 
         <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-orange-300">おすすめ映画</h1>
+          <h1 className="text-amber-300 text-base tracking-[0.3em] uppercase">おすすめ映画</h1>
           <Link
             href="/main"
             className="text-base text-neutral-300 hover:text-zinc-200 transition"

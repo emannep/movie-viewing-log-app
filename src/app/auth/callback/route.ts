@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as "email_change" | "signup" | "recovery" });
     if (!error) {
+      if (type === "signup") {
+        return NextResponse.redirect(new URL("/auth/signup?verified=true", origin));
+      }
       return NextResponse.redirect(new URL(next, origin));
     }
   }
@@ -31,5 +34,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(new URL("/main/settings?error=email_confirm_failed", origin));
+  return NextResponse.redirect(new URL("/auth/signup?error=email_confirm_failed", origin));
 }

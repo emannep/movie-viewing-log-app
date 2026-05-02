@@ -10,13 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { format, isValid, parseISO } from "date-fns"
 import { FaRegCalendarAlt } from "react-icons/fa"
 import { registerMovie, updateMovie } from "@/app/actions/registration"
@@ -198,6 +191,7 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
   const [posterPath, setPosterPath] = React.useState(initialData?.movies?.poster_path ?? "");
   const [voteAverage, setVoteAverage] = React.useState(initialData?.movies?.tmdb_vote_average ?? "");
   const [status, setStatus] = React.useState(defaultStatus);
+  const [rating, setRating] = React.useState(defaultRating !== "" ? String(defaultRating) : "0");
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
   const [accordionValue, setAccordionValue] = React.useState<string | undefined>(
@@ -253,7 +247,7 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
     <div className="w-full flex flex-col gap-3">
 
       {/* ヘッダー */}
-      <header className="flex items-center justify-between pt-1">
+      <header className="relative flex items-center justify-between pt-1">
         <Link
           href="/main"
           className="flex items-center gap-1 text-neutral-300 hover:text-zinc-300 transition-colors"
@@ -261,14 +255,13 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
           <ChevronLeft size={16} />
           <span className="text-base">ホーム</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="h-px w-8 bg-amber-300/50" />
+        <div className="absolute inset-x-0 flex items-center justify-center gap-3 pointer-events-none">
+          <div className="h-px w-16 bg-amber-300/50" />
           <h1 className="text-amber-300 text-lg tracking-[0.3em] uppercase">
             {isEdit ? "作品を編集" : "作品を登録"}
           </h1>
-          <div className="h-px w-8 bg-amber-300/50" />
+          <div className="h-px w-16 bg-amber-300/50" />
         </div>
-        <div className="w-16" />
       </header>
 
       <form action={formAction} className="flex flex-col gap-3">
@@ -407,16 +400,23 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
 
               <div>
                 <label className={labelClass}>ジャンル</label>
-                <Select name="genres" value={genre} onValueChange={setGenre}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="ジャンルを選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {genres?.map((g) => (
-                      <SelectItem key={g.name} value={g.name}>{g.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <input type="hidden" name="genres" value={genre} />
+                <div className="flex flex-wrap gap-1.5">
+                  {genres?.map((g) => (
+                    <button
+                      key={g.name}
+                      type="button"
+                      onClick={() => setGenre(g.name === genre ? "" : g.name)}
+                      className={`text-sm px-2.5 py-1 rounded-full border transition-colors ${
+                        genre === g.name
+                          ? "bg-amber-800/60 border-amber-600/60 text-amber-200"
+                          : "bg-zinc-900 border-neutral-300/50 text-neutral-300 hover:border-amber-700/60"
+                      }`}
+                    >
+                      {g.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -426,33 +426,60 @@ export default function RegisterForm({ genres, initialData }: { genres: { name: 
         <div className={sectionClass}>
           <div>
             <label className={labelClass}>ステータス</label>
-            <Select name="status" value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wishlist">視たい</SelectItem>
-                <SelectItem value="watched">視聴済</SelectItem>
-              </SelectContent>
-            </Select>
+            <input type="hidden" name="status" value={status} />
+            <div className="flex rounded-lg border border-amber-900/30 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setStatus("wishlist")}
+                className={`flex-1 py-2 text-base font-medium transition-colors ${
+                  status === "wishlist"
+                    ? "bg-amber-800 text-amber-100"
+                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+                }`}
+              >
+                視たい
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatus("watched")}
+                className={`flex-1 py-2 text-base font-medium transition-colors border-l border-amber-900/30 ${
+                  status === "watched"
+                    ? "bg-amber-800 text-amber-100"
+                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+                }`}
+              >
+                視聴済
+              </button>
+            </div>
           </div>
 
           {status === "watched" && (
             <div>
               <label className={labelClass}>評価（1〜5）</label>
-              <Select name="rating" defaultValue={defaultRating !== "" ? String(defaultRating) : "0"}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">未評価</SelectItem>
-                  <SelectItem value="1">★☆☆☆☆</SelectItem>
-                  <SelectItem value="2">★★☆☆☆</SelectItem>
-                  <SelectItem value="3">★★★☆☆</SelectItem>
-                  <SelectItem value="4">★★★★☆</SelectItem>
-                  <SelectItem value="5">★★★★★</SelectItem>
-                </SelectContent>
-              </Select>
+              <input type="hidden" name="rating" value={rating} />
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { value: "0", label: "未評価" },
+                  { value: "1", label: "★" },
+                  { value: "2", label: "★★" },
+                  { value: "3", label: "★★★" },
+                  { value: "4", label: "★★★★" },
+                  { value: "5", label: "★★★★★" },
+                ].map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRating(r.value)}
+                    className={`text-sm px-2.5 py-1 rounded-full border transition-colors ${
+                      rating === r.value
+                        ? "bg-amber-800/60 border-amber-600/60 text-amber-200"
+                        : "bg-zinc-900 border-neutral-300/50 text-neutral-300 hover:border-amber-700/60"
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

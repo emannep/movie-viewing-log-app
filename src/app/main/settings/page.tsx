@@ -13,19 +13,18 @@ export default async function SettingsPage() {
 
   return (
     <div className="w-full flex flex-col gap-5">
-      <header className="flex items-center justify-between pt-1">
+      <header className="relative flex items-center justify-between pt-1">
         <Link
           href="/main/profile"
           className="flex items-center gap-1 text-neutral-300 hover:text-zinc-300 transition-colors text-base"
         >
           ← プロフィール
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="h-px w-6 bg-amber-900/50" />
-          <h1 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">設定</h1>
-          <div className="h-px w-6 bg-amber-900/50" />
+        <div className="absolute inset-x-0 flex items-center justify-center gap-3 pointer-events-none">
+          <div className="h-px w-16 bg-amber-300/50" />
+          <h1 className="text-amber-300 text-base tracking-[0.3em] uppercase">設定</h1>
+          <div className="h-px w-16 bg-amber-300/50" />
         </div>
-        <div className="w-20" />
       </header>
       <div className="flex flex-col gap-4">
 

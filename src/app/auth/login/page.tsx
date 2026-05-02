@@ -84,14 +84,8 @@ export default function loginPage() {
               disabled={isLoginSubmitting}
               className="w-full py-2.5 rounded-xl bg-amber-800 hover:bg-amber-700 disabled:opacity-50 text-amber-100 font-semibold text-lg tracking-wide transition-colors"
             >
-              {isLoginSubmitting ? "入館中..." : "入館する"}
+              {isLoginSubmitting ? "ログイン中..." : "ログインする"}
             </button>
-            <p className="text-center text-base text-neutral-300">または</p>
-            <Link href="/auth/signup">
-              <button className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 border border-amber-900/30 text-zinc-300 font-medium text-lg transition-colors">
-                新規アカウント作成
-              </button>
-            </Link>
           </div>
         </form>
         </div>
