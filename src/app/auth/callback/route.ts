@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as "email_change" | "signup" | "recovery" });
     if (!error) {
       if (type === "signup") {
-        return NextResponse.redirect(new URL("/auth/signup?verified=true", origin));
+        return NextResponse.redirect(new URL("/auth/login?verified=true", origin));
       }
       return NextResponse.redirect(new URL(next, origin));
     }
