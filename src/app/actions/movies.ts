@@ -41,9 +41,6 @@ export async function movieAction() {
       code: error.code,
     });
   }
-    //console.error("movies 取得エラー:", error);
-  //}
-  
   const rows = (data ?? []).map((row: any) => ({
     ...row,
     movies: Array.isArray(row.movies) ? row.movies[0] : row.movies,
@@ -53,55 +50,3 @@ export async function movieAction() {
 
 }
 
-/*
-export async function updateMovie(movieId: string, formData: FormData) {
-  const supabase = createSupabaseServerClient();
-
-  const parsed = MovieSchema.safeParse({
-    title: formData.get("title"),
-    original_title: formData.get("original_title"),
-    year: formData.get("year"),
-    poster_url: formData.get("poster_url"),
-    tmdb_id: formData.get("tmdb_id"),
-    imdb_id: formData.get("imdb_id"),
-  });
-  if (!parsed.success) throw new Error(parsed.error.message);
-
-  const { error } = await supabase
-    .from("movies")
-    .update(parsed.data)
-    .eq("id", movieId);
-
-  if (error) throw new Error(error.message);
-}
-*/
-
-/*
-const MovieSchema = z.object({
-  title: z.string().min(1),
-  original_title: z.string().optional().nullable(),
-  year: z.coerce.number().int().min(1800).max(2100).optional().nullable(),
-  poster_url: z.string().url().optional().nullable(),
-  tmdb_id: z.coerce.number().int().optional().nullable(),
-  imdb_id: z.string().optional().nullable(),
-});
-export async function deleteMovie(movieId: string) {
-  const supabase = createClient();
-  const { error } = await supabase.from("movies").delete().eq("id", movieId);
-  if (error) throw new Error(error.message);
-
-  redirect("/movies");
-}
-
-const parsed = MovieSchema.safeParse({
-  title: formData.get("title"),
-  original_title: formData.get("original_title"),
-  year: formData.get("year"),
-  poster_url: formData.get("poster_url"),
-  tmdb_id: formData.get("tmdb_id"),
-  imdb_id: formData.get("imdb_id"),
-});
-if (!parsed.success) throw new Error(parsed.error.message);
-
-  redirect(`/movies/${data.id}`);
-*/

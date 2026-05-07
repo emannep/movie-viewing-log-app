@@ -39,7 +39,7 @@ https://movie-viewing-log-app.vercel.app/
 
 ## 使用技術
 
-- フレームワーク: Next.js 14 (App Router)
+- フレームワーク: Next.js 15 (App Router)
 - 言語: TypeScript
 - スタイリング: Tailwind CSS / shadcn/ui
 - BaaS: Supabase (PostgreSQL / Auth / RLS)
@@ -48,7 +48,7 @@ https://movie-viewing-log-app.vercel.app/
 
 ## インフラ構成図
 
-![インフラ構成図プレースホルダー](URL)
+![インフラ構成図](docs/infra-diagram.png)
 
 ## ER図
 
