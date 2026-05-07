@@ -4,6 +4,15 @@ import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions/login";
 
+function LoginHeader() {
+  return (
+    <div className="border border-amber-800/50 rounded-sm px-8 py-3 bg-amber-950/20 text-center">
+      <p className="text-amber-700/70 text-base tracking-[0.35em] uppercase mb-1">Film Museum</p>
+      <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
+    </div>
+  );
+}
+
 function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -20,18 +29,11 @@ function LoginContent() {
     return () => clearTimeout(timer);
   }, [verified, router]);
 
-  const Header = () => (
-    <div className="border border-amber-800/50 rounded-sm px-8 py-3 bg-amber-950/20 text-center">
-      <p className="text-amber-700/70 text-base tracking-[0.35em] uppercase mb-1">Film Museum</p>
-      <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
-    </div>
-  );
-
   if (verified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0c0907] px-4">
         <div className="w-full max-w-sm flex flex-col gap-6 items-center">
-          <Header />
+          <LoginHeader />
           <div className="rounded-2xl bg-zinc-950/80 border border-amber-700/40 shadow-xl shadow-black/50 px-6 py-10 text-center w-full">
             <p className="text-5xl mb-5">🎬</p>
             <p className="text-2xl text-amber-300 font-bold tracking-wide mb-3">登録完了！</p>
@@ -48,7 +50,7 @@ function LoginContent() {
       <div className="w-full max-w-sm flex flex-col gap-6">
 
         <div className="flex flex-col items-center">
-          <Header />
+          <LoginHeader />
           <p className="mt-3 text-xl text-neutral-300 tracking-widest uppercase">入館手続き</p>
         </div>
 
