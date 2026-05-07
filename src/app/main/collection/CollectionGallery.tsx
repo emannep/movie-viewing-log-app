@@ -34,7 +34,7 @@ function PosterSlot({
   return (
     <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0 max-w-[80px]">
       <button
-        className="relative w-full aspect-[2/3] rounded overflow-hidden border border-amber-900/40 shrink-0 cursor-pointer active:opacity-80"
+        className="relative w-full aspect-2/3 rounded overflow-hidden border border-amber-900/40 shrink-0 cursor-pointer active:opacity-80"
         onClick={onSelect}
         aria-label={`${movie.title}の詳細を見る`}
       >
@@ -42,17 +42,17 @@ function PosterSlot({
           <img
             src={`${TMDB_IMG}${movie.poster_path}`}
             alt={movie.title}
-            className={`w-full h-full object-cover ${!movie.collected ? "opacity-30 grayscale" : ""}`}
+            className={`size-full object-cover ${!movie.collected ? "opacity-30 grayscale" : ""}`}
           />
         ) : (
-          <div className="w-full h-full bg-zinc-800 flex flex-col items-center justify-center gap-1">
+          <div className="size-full bg-zinc-800 flex flex-col items-center justify-center gap-1">
             <span className={`text-sm text-center px-1 leading-tight ${movie.collected ? "text-amber-400" : "text-neutral-300"}`}>
               {movie.title}
             </span>
           </div>
         )}
         {/* ランクバッジ */}
-        <div className={`absolute top-1 left-1 w-5 h-5 rounded-full flex items-center justify-center text-sm font-bold ${rankStyle.bg} ${rankStyle.text}`}>
+        <div className={`absolute top-1 left-1 size-5 rounded-full flex items-center justify-center text-sm font-bold ${rankStyle.bg} ${rankStyle.text}`}>
           {movie.rank}
         </div>
         {movie.collected && (
@@ -64,7 +64,7 @@ function PosterSlot({
           </div>
         )}
       </button>
-      <span className={`text-sm w-full text-center leading-tight break-words ${movie.collected ? "text-zinc-300" : "text-neutral-300"}`}>
+      <span className={`text-sm w-full text-center leading-tight truncate ${movie.collected ? "text-zinc-300" : "text-neutral-300"}`}>
         {movie.title}
       </span>
     </div>
@@ -162,7 +162,7 @@ function CollectionCase({
           {/* COMPLETEスタンプ */}
           {complete && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-amber-400/20 font-black text-4xl tracking-widest rotate-[-12deg] border-2 border-amber-400/20 px-3 py-1 rounded select-none">
+              <span className="text-amber-400/20 font-black text-4xl tracking-widest -rotate-12 border-2 border-amber-400/20 px-3 py-1 rounded select-none">
                 COMPLETE
               </span>
             </div>
@@ -426,7 +426,7 @@ export default function CollectionGallery({
                     onClick={toggleShowCompleted}
                     className="flex items-center gap-2 active:opacity-70 transition-colors"
                   >
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                    <div className={`size-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                       showCompleted ? "bg-amber-500 border-amber-500" : "border-zinc-500"
                     }`}>
                       {showCompleted && <Check size={10} className="text-zinc-900" />}

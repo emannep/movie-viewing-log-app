@@ -42,7 +42,7 @@ export default function RootPage() {
             <p className="text-amber-600/80 text-sm tracking-[0.35em] uppercase mb-0.5">
               Film Museum
             </p>
-            <h1 className="text-amber-300 text-3xl font-bold tracking-[0.1em]">
+            <h1 className="text-amber-300 text-3xl font-bold tracking-widest">
               あなたの映画博物館
             </h1>
           </div>
@@ -59,7 +59,7 @@ export default function RootPage() {
               key={title}
               className="flex flex-col items-center gap-2 rounded-xl bg-zinc-900/70 border border-amber-900/25 px-2 py-4 backdrop-blur-sm text-center"
             >
-              <Icon className="w-6 h-6 text-amber-400" strokeWidth={1.5} />
+              <Icon className="size-6 text-amber-400" strokeWidth={1.5} />
               <span className="text-amber-300 text-sm font-semibold">{title}</span>
               <span className="text-slate-400 text-xs leading-snug">{desc}</span>
             </div>

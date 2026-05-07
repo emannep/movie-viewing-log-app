@@ -1,45 +1,45 @@
 "use client"
 
 import React, { useState } from "react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { autoRegisterMovies, completeTutorial, type TmdbMovie } from "@/app/actions/tutorial"
 import { Button } from "@/components/ui/button"
-import { Star } from "lucide-react"
+import PageGuideSlideshowPopup from "@/components/PageGuideSlideshowPopup"
+import TutorialRegistrationGuide from "@/components/TutorialRegistrationGuide"
+import Image from "next/image";
 
-// チュートリアルに表示するジャンル（よく知られたものを絞り込む）
 const TUTORIAL_GENRES = [
-  { name: "アクション",       tmdbId: 28 },
-  { name: "アドベンチャー",   tmdbId: 12 },
-  { name: "アニメーション",   tmdbId: 16 },
-  { name: "コメディ",         tmdbId: 35 },
-  { name: "ドラマ",           tmdbId: 18 },
-  { name: "ファンタジー",     tmdbId: 14 },
-  { name: "ホラー",           tmdbId: 27 },
-  { name: "ミステリー",       tmdbId: 9648 },
-  { name: "ロマンス",         tmdbId: 10749 },
-  { name: "SF",               tmdbId: 878 },
-  { name: "スリラー",         tmdbId: 53 },
-  { name: "歴史",             tmdbId: 36 },
+  { name: "アクション",     tmdbId: 28 },
+  { name: "アドベンチャー", tmdbId: 12 },
+  { name: "アニメーション", tmdbId: 16 },
+  { name: "コメディ",       tmdbId: 35 },
+  { name: "ドラマ",         tmdbId: 18 },
+  { name: "ファンタジー",   tmdbId: 14 },
+  { name: "ホラー",         tmdbId: 27 },
+  { name: "ミステリー",     tmdbId: 9648 },
+  { name: "ロマンス",       tmdbId: 10749 },
+  { name: "SF",             tmdbId: 878 },
+  { name: "スリラー",       tmdbId: 53 },
+  { name: "歴史",           tmdbId: 36 },
 ]
 
 const TMDB_IMG_SM = "https://image.tmdb.org/t/p/w92"
-const TMDB_IMG_MD = "https://image.tmdb.org/t/p/w185"
 
-// 登録ページの各項目説明
-const FIELD_EXPLANATIONS = [
-  { num: "①", label: "タイトル検索",  desc: "タイトルを入力してTMDB検索ボタンを押すと、映画の詳細情報（年代・ジャンル）が自動入力されます" },
-  { num: "②", label: "ステータス",    desc: "「視聴済み」か「観たい」を選択。視聴済みにすると評価もつけられます" },
-  { num: "③", label: "メモ",          desc: "感想や覚えておきたいことを自由に書けます（任意）" },
-]
+// ステップ定義:
+// 1: ページ紹介スライドショー
+// 2: 登録ページ説明
+// 3: ジャンル選択
+// 4: ガイド付き登録
+// 5: 完了
 
 export default function TutorialClient() {
   const router = useRouter()
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(1)
   const [selectedGenre, setSelectedGenre] = useState<{ name: string; tmdbId: number } | null>(null)
-  const [suggestedMovies, setSuggestedMovies] = useState<TmdbMovie[]>([])
+  const [selectedMovie, setSelectedMovie] = useState<TmdbMovie | null>(null)
+  const [autoMovies, setAutoMovies] = useState<TmdbMovie[]>([])
   const [isFetching, setIsFetching] = useState(false)
-  const [isRegistering, setIsRegistering] = useState(false)
+  const [isAutoRegistering, setIsAutoRegistering] = useState(false)
   const [error, setError] = useState("")
   const [isSkipping, setIsSkipping] = useState(false)
 
@@ -55,8 +55,10 @@ export default function TutorialClient() {
         setIsFetching(false)
         return
       }
-      setSuggestedMovies(data.results)
-      setStep(2)
+      const top: TmdbMovie[] = data.results.slice(0, 3)
+      setSelectedMovie(top[0])
+      setAutoMovies(top.slice(1))
+      setStep(4)
     } catch {
       setError("映画の取得に失敗しました。")
     } finally {
@@ -64,21 +66,18 @@ export default function TutorialClient() {
     }
   }
 
-  async function handleAutoRegister() {
-    setIsRegistering(true)
-    setError("")
+  async function handleRegistrationComplete() {
+    setIsAutoRegistering(true)
     try {
-      const result = await autoRegisterMovies(suggestedMovies)
-      if (result && "error" in result) {
-        setError(result.error)
-        return
+      if (autoMovies.length > 0) {
+        await autoRegisterMovies(autoMovies)
       }
       await completeTutorial()
-      setStep(3)
+      setStep(5)
     } catch (e) {
-      setError(e instanceof Error ? e.message : "登録中にエラーが発生しました")
+      setError(e instanceof Error ? e.message : "エラーが発生しました")
     } finally {
-      setIsRegistering(false)
+      setIsAutoRegistering(false)
     }
   }
 
@@ -94,72 +93,30 @@ export default function TutorialClient() {
     }
   }
 
-  const Header = () => (
-    <div className="border border-amber-800/50 rounded-sm px-8 py-3 bg-amber-950/20 text-center">
-      <p className="text-amber-700/70 text-sm tracking-[0.35em] uppercase mb-1">Film Museum</p>
-      <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">あなたの映画博物館</h1>
-    </div>
-  )
+  // ── Step 1: ページ紹介スライドショー ──────────────────
+  if (step === 1) {
+    return <PageGuideSlideshowPopup onComplete={() => setStep(2)} />
+  }
 
-  // ── Step 0: 登録ページ説明 ─────────────────────────────
-  if (step === 0) {
+  // ── Step 2: 登録ページ説明 ────────────────────────────
+  if (step === 2) {
     return (
-      <div className="min-h-screen bg-[#0c0907] px-4 py-8">
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <Header />
-            <p className="text-neutral-400 text-sm tracking-widest uppercase">使い方</p>
+      <div className="min-h-screen bg-[#0c0907] px-4 py-6">
+        <div className="w-full max-w-sm mx-auto flex flex-col gap-4">
+          <div className="border border-amber-800/50 rounded-sm px-8 py-2 bg-amber-950/20 text-center">
+            <div className="text-amber-700/70 text-sm tracking-[0.35em] uppercase">tutorial</div>
+            <h1 className="text-amber-300 text-2xl font-bold tracking-[0.15em]">映画登録</h1>
           </div>
 
-          <p className="text-neutral-300 text-base text-center leading-relaxed">
-            映画を登録するとおすすめが表示され、<br />
-            コレクションが解放されていきます。
-          </p>
-
-          {/* 登録ページのスクショ＋吹き出し */}
-          <div className="relative mx-auto" style={{ width: "240px" }}>
-            <Image
-              src="/screenshots/registration.png"
-              alt="登録ページ"
-              width={425}
-              height={870}
-              className="w-full rounded-xl border border-amber-900/30 shadow-lg"
-            />
-            {/* ① タイトル検索 (上部 ~19%) */}
-            <div className="absolute flex items-center gap-1" style={{ top: "16%", right: "-56px" }}>
-              <div className="h-px w-5 bg-amber-500/60" />
-              <span className="text-amber-400 font-bold text-sm bg-amber-950/80 rounded-full w-6 h-6 flex items-center justify-center border border-amber-700/50">①</span>
-            </div>
-            {/* ② ステータス (~53%) */}
-            <div className="absolute flex items-center gap-1" style={{ top: "51%", right: "-56px" }}>
-              <div className="h-px w-5 bg-amber-500/60" />
-              <span className="text-amber-400 font-bold text-sm bg-amber-950/80 rounded-full w-6 h-6 flex items-center justify-center border border-amber-700/50">②</span>
-            </div>
-            {/* ③ メモ (~65%) */}
-            <div className="absolute flex items-center gap-1" style={{ top: "64%", right: "-56px" }}>
-              <div className="h-px w-5 bg-amber-500/60" />
-              <span className="text-amber-400 font-bold text-sm bg-amber-950/80 rounded-full w-6 h-6 flex items-center justify-center border border-amber-700/50">③</span>
-            </div>
-          </div>
-
-          {/* 説明リスト */}
-          <div className="flex flex-col gap-3 rounded-xl bg-zinc-900/60 border border-amber-900/20 px-4 py-4">
-            {FIELD_EXPLANATIONS.map(({ num, label, desc }) => (
-              <div key={num} className="flex gap-3 items-start">
-                <span className="text-amber-400 font-bold text-sm bg-amber-950/80 rounded-full w-6 h-6 flex items-center justify-center border border-amber-700/50 flex-shrink-0 mt-0.5">
-                  {num}
-                </span>
-                <div>
-                  <p className="text-amber-300 text-sm font-semibold">{label}</p>
-                  <p className="text-neutral-400 text-xs leading-relaxed mt-0.5">{desc}</p>
-                </div>
-              </div>
-            ))}
+          <div className="w-full text-center py-8">
+            それでは実際に映画を登録してみましょう！<br />
+            最初のコレクションを解放するまでを<br />
+            お手伝いします！
           </div>
 
           <div className="flex flex-col gap-3">
             <Button
-              onClick={() => setStep(1)}
+              onClick={() => setStep(3)}
               className="w-full h-12 bg-amber-700 hover:bg-amber-600 text-white font-bold text-base"
             >
               はじめる
@@ -169,7 +126,7 @@ export default function TutorialClient() {
               disabled={isSkipping}
               className="text-neutral-500 text-sm text-center hover:text-neutral-400 transition disabled:opacity-50"
             >
-              スキップして後で自分で登録する
+              スキップする
             </button>
           </div>
         </div>
@@ -177,19 +134,19 @@ export default function TutorialClient() {
     )
   }
 
-  // ── Step 1: ジャンル選択 ───────────────────────────────
-  if (step === 1) {
+  // ── Step 3: ジャンル選択 ───────────────────────────────
+  if (step === 3) {
     return (
       <div className="min-h-screen bg-[#0c0907] px-4 py-8">
         <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
           <div className="flex flex-col items-center gap-3">
             <div className="flex gap-2">
               {[0, 1, 2].map(i => (
-                <div key={i} className={`w-3 h-3 rounded-full transition-colors ${i === 0 ? "bg-amber-400" : "bg-zinc-700"}`} />
+                <div key={i} className={`size-3 rounded-full transition-colors ${i === 0 ? "bg-amber-400" : "bg-zinc-700"}`} />
               ))}
             </div>
             <p className="text-amber-300 font-bold text-lg text-center">好きなジャンルを選んでください</p>
-            <p className="text-neutral-400 text-sm text-center">そのジャンルの人気映画を3本自動で登録します</p>
+            <p className="text-neutral-400 text-sm text-center">そのジャンルの人気映画を一緒に登録します</p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
@@ -224,7 +181,7 @@ export default function TutorialClient() {
               disabled={isSkipping}
               className="text-neutral-500 text-sm text-center hover:text-neutral-400 transition disabled:opacity-50"
             >
-              スキップして後で自分で登録する
+              スキップして自分で登録する
             </button>
           </div>
         </div>
@@ -232,73 +189,32 @@ export default function TutorialClient() {
     )
   }
 
-  // ── Step 2: 映画確認 ───────────────────────────────────
-  if (step === 2) {
-    return (
-      <div className="min-h-screen bg-[#0c0907] px-4 py-8">
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-5">
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex gap-2">
-              {[0, 1, 2].map(i => (
-                <div key={i} className={`w-3 h-3 rounded-full transition-colors ${i <= 1 ? "bg-amber-500" : "bg-zinc-700"}`} />
-              ))}
-            </div>
-            <p className="text-amber-300 font-bold text-lg text-center">この3本を登録します</p>
-            <p className="text-neutral-400 text-sm text-center">
-              {selectedGenre?.name}の人気映画 / 視聴済み ⭐️⭐️⭐️⭐️⭐️
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {suggestedMovies.map((m) => (
-              <div key={m.id} className="flex items-center gap-3 rounded-xl bg-zinc-900/80 border border-amber-900/20 p-3">
-                {m.poster_path ? (
-                  <img
-                    src={`${TMDB_IMG_MD}${m.poster_path}`}
-                    alt=""
-                    className="rounded flex-shrink-0 object-cover"
-                    style={{ width: "52px", height: "78px" }}
-                  />
-                ) : (
-                  <div className="rounded flex-shrink-0 bg-zinc-800" style={{ width: "52px", height: "78px" }} />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-zinc-100 font-semibold text-sm line-clamp-2">{m.title}</p>
-                  <p className="text-zinc-500 text-xs mt-0.5">{m.release_date?.substring(0, 4)}</p>
-                  <div className="flex gap-0.5 mt-1.5">
-                    {[1,2,3,4,5].map(n => (
-                      <Star key={n} size={14} className="fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-
-          <div className="flex flex-col gap-3">
-            <Button
-              onClick={handleAutoRegister}
-              disabled={isRegistering}
-              className="w-full h-12 bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-base"
-            >
-              {isRegistering ? "登録中..." : "この3本を登録する"}
-            </Button>
-            <button
-              type="button"
-              onClick={() => { setStep(1); setSelectedGenre(null); setSuggestedMovies([]); setError("") }}
-              className="text-neutral-500 text-sm text-center hover:text-neutral-400 transition"
-            >
-              ジャンルを選び直す
-            </button>
+  // ── Step 4: ガイド付き登録 ────────────────────────────
+  if (step === 4) {
+    if (isAutoRegistering) {
+      return (
+        <div className="min-h-screen bg-[#0c0907] flex items-center justify-center px-4">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-5xl">🎬</p>
+            <p className="text-amber-300 text-xl font-bold">あと{autoMovies.length}本を自動登録中...</p>
+            <p className="text-neutral-400 text-sm">しばらくお待ちください</p>
           </div>
         </div>
-      </div>
-    )
+      )
+    }
+    if (selectedMovie) {
+      return (
+        <TutorialRegistrationGuide
+          movie={selectedMovie}
+          onComplete={handleRegistrationComplete}
+        />
+      )
+    }
   }
 
-  // ── Step 3: 完了 ───────────────────────────────────────
+  // ── Step 5: 完了 ───────────────────────────────────────
+  const allMovies = [selectedMovie, ...autoMovies].filter(Boolean) as TmdbMovie[]
+
   return (
     <div className="min-h-screen bg-[#0c0907] px-4 py-8 flex items-center justify-center">
       <div className="w-full max-w-sm flex flex-col items-center gap-6">
@@ -306,28 +222,34 @@ export default function TutorialClient() {
         <div className="text-center">
           <p className="text-2xl text-amber-300 font-bold mb-2">博物館が完成しました！</p>
           <p className="text-neutral-300 text-base">
-            {selectedGenre?.name}の映画3本を<br />視聴済みで登録しました
+            {selectedGenre?.name}の映画{allMovies.length}本を<br />視聴済みで登録しました
           </p>
         </div>
 
-        {/* 登録した映画サムネイル */}
-        <div className="flex gap-2 justify-center">
-          {suggestedMovies.map((m) => m.poster_path && (
-            <img
+        <div className="flex gap-3 justify-center">
+          {allMovies.map((m) => m.poster_path && (
+            <Image
               key={m.id}
               src={`${TMDB_IMG_SM}${m.poster_path}`}
               alt={m.title}
               className="rounded-lg object-cover border border-amber-900/30 shadow-md"
-              style={{ width: "60px", height: "90px" }}
+              style={{ width: "70px", height: "105px" }}
             />
           ))}
+        </div>
+
+        <div className="text-center">
+          <p className="text-amber-300 font-bold text-lg mb-1">最初の展示室が解放されました！</p>
+          <p className="text-neutral-400 text-sm">
+            展示室の映画を見たり、新しい映画を登録したり、<br />自由に楽しんでください！
+          </p>
         </div>
 
         <Button
           onClick={() => router.push("/main")}
           className="w-full h-12 bg-amber-700 hover:bg-amber-600 text-white font-bold text-base"
         >
-          博物館へ行く
+          ホームへ行く
         </Button>
       </div>
     </div>

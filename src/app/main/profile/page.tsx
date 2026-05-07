@@ -5,6 +5,7 @@ import { CROWN_LABELS, CROWN_COLORS, CROWN_ICON_COLORS } from "@/lib/points-util
 import Link from "next/link";
 import Image from "next/image";
 import { Crown } from "lucide-react";
+import TutorialWelcomeButton from "@/components/TutorialWelcomeButton";
 
 function CrownBadge({
   rank,
@@ -99,14 +100,14 @@ export default async function ProfilePage() {
 
         {/* ユーザー情報 */}
         <section className="mb-6 flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
+          <div className="size-20 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
                 alt="アイコン"
                 width={80}
                 height={80}
-                className="object-cover w-full h-full"
+                className="object-cover size-full"
                 unoptimized
               />
             ) : (
@@ -149,7 +150,7 @@ export default async function ProfilePage() {
         </section>
 
         {/* 王冠 */}
-        <section>
+        <section className="mb-6">
           <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase mb-3">
             王冠
           </h2>

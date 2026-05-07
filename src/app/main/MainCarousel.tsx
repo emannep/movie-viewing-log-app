@@ -32,10 +32,10 @@ function MovieThumb({
         <img
           src={`https://image.tmdb.org/t/p/w154${poster_path}`}
           alt={title}
-          className="w-full rounded object-cover aspect-[2/3] bg-zinc-800"
+          className="w-full rounded object-cover aspect-2/3 bg-zinc-800"
         />
       ) : (
-        <div className="w-full aspect-[2/3] bg-zinc-800 rounded flex items-center justify-center text-sm text-neutral-300">
+        <div className="w-full aspect-2/3 bg-zinc-800 rounded flex items-center justify-center text-sm text-neutral-300">
           No Image
         </div>
       )}
@@ -71,18 +71,19 @@ export default function MainCarousel({
       {/* おすすめ映画 */}
       <section>
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
           <div className="flex items-center gap-2">
             <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">おすすめ映画</h2>
             <Link href="/main/recommend_movies" className="text-base text-amber-600/80 hover:text-amber-600 tracking-widest uppercase transition-colors">
               全て →
             </Link>
           </div>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
         </div>
         {recommendations.length === 0 ? (
           <p className="text-base text-neutral-300 text-center py-2">
-            視聴済み映画を★4以上で登録するとおすすめが表示されます
+            視聴済み映画を★4以上で登録すると<br />
+            おすすめが表示されます
           </p>
         ) : (
           <Carousel
@@ -110,9 +111,9 @@ export default function MainCarousel({
       {/* 観たいリスト */}
       <section>
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
           <h2 className="text-amber-600/90 text-base tracking-[0.3em] uppercase">観たいリスト</h2>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
         </div>
         {watchlist.length === 0 ? (
           <p className="text-base text-neutral-300 text-center py-2">
