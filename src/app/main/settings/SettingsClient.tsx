@@ -4,6 +4,7 @@ import { useState, useTransition, useRef } from "react";
 import Image from "next/image";
 import { updateDisplayName, updateEmail, updatePassword, uploadAvatar } from "@/app/actions/profile";
 import { logoutAction } from "@/app/actions/logout";
+import PageGuideSlideshowPopup from "@/components/PageGuideSlideshowPopup";
 
 type Result = { error?: string; success?: boolean; message?: string; url?: string } | null;
 
@@ -39,6 +40,7 @@ export default function SettingsClient({
   const [isPendingPassword, startPassword] = useTransition();
   const [isPendingAvatar, startAvatar] = useTransition();
   const [isPendingLogout, startLogout] = useTransition();
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +109,7 @@ export default function SettingsClient({
   }
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       {/* アイコン */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
@@ -114,7 +117,7 @@ export default function SettingsClient({
         <form onSubmit={handleAvatarSubmit}>
           <div className="flex items-center gap-4 mb-4">
             <div
-              className="w-20 h-20 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-600 flex items-center justify-center cursor-pointer shrink-0"
+              className="size-20 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-600 flex items-center justify-center cursor-pointer shrink-0"
               onClick={() => fileInputRef.current?.click()}
             >
               {avatarPreview ? (
@@ -123,7 +126,7 @@ export default function SettingsClient({
                   alt="アイコン"
                   width={80}
                   height={80}
-                  className="object-cover w-full h-full"
+                  className="object-cover size-full"
                   unoptimized
                 />
               ) : (
@@ -231,6 +234,18 @@ export default function SettingsClient({
         </form>
       </section>
 
+      <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
+        <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">ヘルプ</h2>
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            className="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-base font-medium transition-colors"
+          >
+            各ページの説明を確認する
+          </button>
+      </section>
+
+
       {/* ログアウト */}
       <section className="bg-zinc-900/60 border border-zinc-700/40 rounded-xl p-5">
         <h2 className="text-neutral-300 text-sm tracking-widest uppercase mb-4">アカウント</h2>
@@ -251,5 +266,11 @@ export default function SettingsClient({
         </form>
       </section>
     </div>
+    {guideOpen && (
+      <PageGuideSlideshowPopup
+        onComplete={() => setGuideOpen(false)}
+      />
+    )}
+    </>
   );
 }

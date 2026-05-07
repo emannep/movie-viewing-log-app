@@ -39,10 +39,10 @@ export default async function RecommendMoviesPage() {
                   <img
                     src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
                     alt={movie.title}
-                    className="w-full aspect-[2/3] object-cover bg-zinc-800"
+                    className="w-full aspect-2/3 object-cover bg-zinc-800"
                   />
                 ) : (
-                  <div className="w-full aspect-[2/3] bg-zinc-800 flex items-center justify-center text-base text-neutral-300">
+                  <div className="w-full aspect-2/3 bg-zinc-800 flex items-center justify-center text-base text-neutral-300">
                     No Image
                   </div>
                 )}

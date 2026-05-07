@@ -23,11 +23,11 @@ function CollectionPreview({
     <Link href="/main/collection">
       <div className="bg-zinc-900/70 border border-amber-800/40 rounded-2xl p-2.5 shadow-inner shadow-black/30 active:opacity-80 transition-opacity">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-900/50" />
           <span className="text-amber-600/90 text-lg tracking-[0.3em] uppercase">
             {label ?? "コレクション"}
           </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-900/50" />
+          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-900/50" />
         </div>
 
         {collection ? (
@@ -61,10 +61,10 @@ function CollectionPreview({
                     <img
                       src={`${TMDB_IMG}${movie.poster_path}`}
                       alt={movie.title}
-                      className="w-full h-full object-cover"
+                      className="size-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="size-full flex items-center justify-center">
                       {movie.collected ? (
                         <span className="text-amber-400 text-sm text-center px-0.5 leading-tight">
                           {movie.title}
@@ -85,7 +85,8 @@ function CollectionPreview({
           <div className="flex flex-col items-center py-3 gap-1.5 text-center">
             <span className="text-2xl opacity-30">🏛️</span>
             <p className="text-neutral-300 text-base">
-              同じジャンルの映画を3本登録すると展示室が解放されます
+              同じジャンルの映画を3本登録すると<br />
+              展示室が解放されます
             </p>
             <p className="text-amber-600/80 hover:text-amber-600 text-lg tracking-wide mt-0.5">展示室へ →</p>
           </div>

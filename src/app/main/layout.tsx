@@ -1,11 +1,17 @@
 import React, { type ReactNode } from 'react';
 import BottomNav from "@/components/BottomNav";
 import Image from 'next/image'
+import { cookies } from "next/headers"
+import TutorialWelcomePopup from "@/components/TutorialWelcomePopup"
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies()
+  const tutorialDone = !!cookieStore.get("tutorial_done")?.value
+
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-grow max-w-lg mx-auto w-full px-4 pt-4 pb-8">
+      {!tutorialDone && <TutorialWelcomePopup />}
+      <div className="grow max-w-lg mx-auto w-full px-4 pt-4 pb-8">
         {children}
         <BottomNav />
       </div>
