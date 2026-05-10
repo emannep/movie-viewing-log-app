@@ -1,31 +1,3 @@
-// シーズンキー・レベル・王冠の計算ユーティリティ（"use server"不要）
-
-// ────────────────────────────────────────────────
-// シーズンキー
-// 春: 3〜5月 / 夏: 6〜8月 / 秋: 9〜11月 / 冬: 12〜2月
-// 冬は12月を起点年とする（例: 2025-12 〜 2026-02 = "2025-winter"）
-// ────────────────────────────────────────────────
-export function getSeasonKey(date: Date): string {
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  if (month >= 3 && month <= 5) return `${year}-spring`;
-  if (month >= 6 && month <= 8) return `${year}-summer`;
-  if (month >= 9 && month <= 11) return `${year}-fall`;
-  const seasonYear = month === 12 ? year : year - 1;
-  return `${seasonYear}-winter`;
-}
-
-export function getSeasonLabel(key: string): string {
-  const labels: Record<string, string> = {
-    spring: "春",
-    summer: "夏",
-    fall: "秋",
-    winter: "冬",
-  };
-  const [year, season] = key.split("-");
-  return `${year}年 ${labels[season] ?? season}`;
-}
-
 export function getSeasonRange(date: Date): { start: Date; end: Date } {
   const month = date.getMonth() + 1;
   const year = date.getFullYear();

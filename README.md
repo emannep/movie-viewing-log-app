@@ -8,12 +8,12 @@
 
 ## スクリーンショット
 
-![ログイン画面](docs/screenshots/01_auth_login.png)
-![メイン画面](docs/screenshots/02_main.png)
-![登録画面](docs/screenshots/03_registration.png)
-![一覧画面](docs/screenshots/04_movies.png)
-![コレクション画面](docs/screenshots/05_collection.png)
-![プロフィール画面](docs/screenshots/06_profile.png)
+<img src="docs/screenshots/01_auth_login.png" width="425" height="1194" alt="ログイン画面">
+<img src="docs/screenshots/02_main.png" width="425" height="1194" alt="メイン画面">
+<img src="docs/screenshots/03_registration.png" width="425" height="1194" alt="登録画面">
+<img src="docs/screenshots/04_movies.png" width="425" height="1194" alt="一覧画面">
+<img src="docs/screenshots/05_collection.png" width="425" height="1194" alt="コレクション画面">
+<img src="docs/screenshots/06_profile.png" width="425" height="1194" alt="プロフィール画面">
 
 
 ## サービスURL
@@ -39,7 +39,7 @@ https://movie-viewing-log-app.vercel.app/
 
 ## 使用技術
 
-- フレームワーク: Next.js 14 (App Router)
+- フレームワーク: Next.js 15 (App Router)
 - 言語: TypeScript
 - スタイリング: Tailwind CSS / shadcn/ui
 - BaaS: Supabase (PostgreSQL / Auth / RLS)
@@ -48,7 +48,7 @@ https://movie-viewing-log-app.vercel.app/
 
 ## インフラ構成図
 
-![インフラ構成図プレースホルダー](URL)
+![インフラ構成図](docs/infra-diagram.png)
 
 ## ER図
 
