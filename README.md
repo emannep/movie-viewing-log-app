@@ -8,12 +8,20 @@
 
 ## スクリーンショット
 
-<img src="docs/screenshots/01_auth_login.png" width="425" height="1194" alt="ログイン画面">
-<img src="docs/screenshots/02_main.png" width="425" height="1194" alt="メイン画面">
-<img src="docs/screenshots/03_registration.png" width="425" height="1194" alt="登録画面">
-<img src="docs/screenshots/04_movies.png" width="425" height="1194" alt="一覧画面">
-<img src="docs/screenshots/05_collection.png" width="425" height="1194" alt="コレクション画面">
-<img src="docs/screenshots/06_profile.png" width="425" height="1194" alt="プロフィール画面">
+<table>
+  <tr>
+    <td><img src="docs/screenshots/01_auth_login.png" width="425" height="1194" alt="ログイン画面"></td>
+    <td><img src="docs/screenshots/02_main.png" width="425" height="1194" alt="メイン画面"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/03_registration.png" width="425" height="1194" alt="登録画面"></td>
+    <td><img src="docs/screenshots/04_movies.png" width="425" height="1194" alt="一覧画面"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/05_collection.png" width="425" height="1194" alt="コレクション画面"></td>
+    <td><img src="docs/screenshots/06_profile.png" width="425" height="1194" alt="プロフィール画面"></td>
+  </tr>
+</table>
 
 
 ## サービスURL
@@ -81,5 +89,5 @@ https://movie-viewing-log-app.vercel.app/
 "This product uses the TMDB API but is not
 endorsed or certified by TMDB."
 
-[![TMDBロゴ画像](./public/tmdb_logo.svg)](https://www.themoviedb.org/)
+<a href="https://www.themoviedb.org/"><img src="./public/tmdb_logo.svg" width="200" alt="TMDBロゴ画像"></a>
 TMDB公式サイト: https://www.themoviedb.org/
